@@ -1,2 +1,3 @@
 # openg2p-g2p-bridge-mapper-resolve-batch
-Batch Infrastructure to resolve ID-Account by look up into ID-Account-Mapper (SPAR)
+Example Bank Implementation - to demonstrate G2P Payments
+This is purely a simulator - not to be used in production
