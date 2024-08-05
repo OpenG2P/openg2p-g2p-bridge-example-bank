@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from openg2p_fastapi_common.models import BaseORMModelWithTimes
-from sqlalchemy import DateTime, Float, Integer, String
+from sqlalchemy import DateTime, Float, Integer, String, Text
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -31,7 +31,7 @@ class Account(BaseORMModelWithTimes):
 class FundBlock(BaseORMModelWithTimes):
     __tablename__ = "fund_blocks"
     block_reference_no: Mapped[str] = mapped_column(String, index=True, unique=True)
-    account_no: Mapped[str] = mapped_column(String)
+    account_number: Mapped[str] = mapped_column(String)
     currency: Mapped[str] = mapped_column(String)
     amount: Mapped[float] = mapped_column(Float)
     amount_released: Mapped[float] = mapped_column(Float, default=0)
@@ -104,3 +104,12 @@ class AccountingLog(BaseORMModelWithTimes):
     narrative_6: Mapped[str] = mapped_column(
         String, nullable=True
     )  # beneficiary phone number
+
+
+class AccountStatement(BaseORMModelWithTimes):
+    __tablename__ = "account_statements"
+    account_number: Mapped[str] = mapped_column(String, index=True)
+    account_statement_lob: Mapped[str] = mapped_column(Text, nullable=True)
+    account_statement_date: Mapped[datetime.date] = mapped_column(
+        DateTime, default=datetime.date(datetime.utcnow())
+    )
