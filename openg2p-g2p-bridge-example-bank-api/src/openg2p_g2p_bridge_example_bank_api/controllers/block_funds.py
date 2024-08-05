@@ -2,12 +2,14 @@ import uuid
 
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
+from openg2p_g2p_bridge_example_bank_models.models import Account, FundBlock
+from openg2p_g2p_bridge_example_bank_models.schemas import (
+    BlockFundsRequest,
+    BlockFundsResponse,
+)
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
-
-from openg2p_g2p_bridge_example_bank_models.models import Account, FundBlock
-from openg2p_g2p_bridge_example_bank_models.schemas import BlockFundsRequest, BlockFundsResponse
 
 
 class BlockFundsController(BaseController):
@@ -27,7 +29,7 @@ class BlockFundsController(BaseController):
         session_maker = async_sessionmaker(dbengine.get(), expire_on_commit=False)
         async with session_maker() as session:
             stmt = select(Account).where(
-                (Account.account_number == request.account_no)
+                (Account.account_number == request.account_number)
                 & (Account.account_currency == request.currency)
             )
             result = await session.execute(stmt)
@@ -48,7 +50,7 @@ class BlockFundsController(BaseController):
 
             await session.execute(
                 update(Account)
-                .where(Account.account_number == request.account_no)
+                .where(Account.account_number == request.account_number)
                 .values(
                     available_balance=account.book_balance
                     - (account.blocked_amount + request.amount),
@@ -59,7 +61,7 @@ class BlockFundsController(BaseController):
             block_reference_no = str(uuid.uuid4())
             fund_block = FundBlock(
                 block_reference_no=block_reference_no,
-                account_no=request.account_no,
+                account_number=request.account_number,
                 amount=request.amount,
                 currency=request.currency,
                 active=True,
