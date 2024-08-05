@@ -2,11 +2,16 @@ from typing import List
 
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
+from openg2p_g2p_bridge_example_bank_models.models import (
+    FundBlock,
+    InitiatePaymentRequest,
+)
+from openg2p_g2p_bridge_example_bank_models.schemas import (
+    InitiatePaymentPayload,
+    InitiatorPaymentResponse,
+)
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
-
-from openg2p_g2p_bridge_example_bank_models.models import FundBlock, InitiatePaymentRequest
-from openg2p_g2p_bridge_example_bank_models.schemas import InitiatePaymentPayload, InitiatorPaymentResponse
 
 
 class PaymentController(BaseController):

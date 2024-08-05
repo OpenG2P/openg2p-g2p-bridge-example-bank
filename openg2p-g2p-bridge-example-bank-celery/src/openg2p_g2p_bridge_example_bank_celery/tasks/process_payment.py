@@ -152,7 +152,9 @@ def generate_failures(
             session.execute(
                 select(FundBlock).where(
                     FundBlock.block_reference_no
-                    == corresponding_fund_blocks[account_log.reference_no].block_reference_no
+                    == corresponding_fund_blocks[
+                        account_log.reference_no
+                    ].block_reference_no
                 )
             )
             .scalars()
