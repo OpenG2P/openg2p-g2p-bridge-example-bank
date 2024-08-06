@@ -45,9 +45,9 @@ class Mt940Writer(BaseService):
                 transaction["transaction_amount"]
             ).replace(".", ","),
             transaction_type=transaction["transaction_type"].value,
-            customer_reference="{:<17}".format(transaction["customer_reference"]),
-            bank_reference="{:<17}".format(transaction["bank_reference"]),
-            supplementary_details="{:<34}".format(transaction["supplementary_details"]),
+            customer_reference=transaction["customer_reference"],
+            bank_reference=transaction["bank_reference"],
+            supplementary_details=transaction["supplementary_details"],
         )
 
     def create_statement(
@@ -74,10 +74,28 @@ class Mt940Writer(BaseService):
         result.append(f':20:{statement["reference_number"]}')
         result.append(f':25:{statement["account"]}')
         result.append(f':28C:{statement["statement_number"]}')
-        result.append(f':60F:{statement["opening_balance"]}')
+        result.append(f':60F:{self.format_balance(statement["opening_balance"])}')
         for transaction in statement["transactions"]:
             result.append(f":61:{self.format_transaction(transaction)}")
             if transaction["additional_info"]:
                 result.append(f':86:{transaction["additional_info"]}')
-        result.append(f':62F:{statement["closing_balance"]}')
+        result.append(f':62F:{self.format_balance(statement["closing_balance"])}')
         return "\n".join(result)
+
+    def create_balance(self, amount, date, currency_code):
+        balance = {
+            "amount": amount,
+            "date": date,
+            "currency_code": currency_code,
+        }
+        return balance
+
+    def format_balance(self, balance):
+        return '{category}{date}{currency_code}{amount}'.format(
+            category='C' if balance['amount'] >= 0 else 'D',
+            date=balance['date'].strftime('%y%m%d'),
+            currency_code=balance['currency_code'],
+            amount=f'{balance["amount"]:0.2f}'.replace('.', ',').replace('-', ''),
+        )
+
+

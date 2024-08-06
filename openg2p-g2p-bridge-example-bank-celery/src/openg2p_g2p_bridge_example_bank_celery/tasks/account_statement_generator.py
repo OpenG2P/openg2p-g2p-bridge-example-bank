@@ -64,16 +64,17 @@ def account_statement_generator(account_statement_id: int):
         if not account_logs:
             return
 
+        mt940_writer = Mt940Writer.get_component()
         currency = account.account_currency
         statement_date = account_statement.account_statement_date
-        mt940_account = MT940Account(account.account_number, "000001")
-        mt940_opening_balance = Balance(Decimal("100000000"), statement_date, currency)
-        mt940_closing_balance = Balance(
+        mt940_account = account.account_number
+        mt940_opening_balance = mt940_writer.create_balance(Decimal("100000000"), statement_date, currency)
+        mt940_closing_balance = mt940_writer.create_balance(
             Decimal(account.book_balance), statement_date, currency
         )
 
 
-        mt940_writer = Mt940Writer.get_component()
+
         transactions = []
         for account_log in account_logs:
             transaction_debit_credit = account_log.debit_credit
@@ -117,6 +118,6 @@ def account_statement_generator(account_statement_id: int):
             mt940_closing_balance,
             transactions,
         )
-
-        account_statement.account_statement_lob = str(statement)
+        mt940_statement = mt940_writer.format_statement(statement)
+        account_statement.account_statement_lob = str(mt940_statement)
         session.commit()

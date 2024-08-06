@@ -26,7 +26,6 @@ class Initializer(BaseInitializer):
         BlockFundsController().post_init()
         FundAvailabilityController().post_init()
         PaymentController().post_init()
-        Mt940Writer()
 
 
 def get_engine():
@@ -50,3 +49,5 @@ celery_app.conf.beat_schedule = {
 }
 
 celery_app.conf.timezone = "UTC"
+# Initialize the Mt940Writer here
+Mt940Writer()
