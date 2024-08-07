@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 
 from openg2p_g2p_bridge_example_bank_models.models import (
@@ -16,7 +17,6 @@ from ..utils import Mt940Writer, TransactionType
 _config = Settings.get_config()
 _engine = get_engine()
 
-import logging
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
 
