@@ -4,6 +4,7 @@ from .account import (
     AccountStatement,
     DebitCreditTypes,
     FundBlock,
+    InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
     PaymentStatus,
 )

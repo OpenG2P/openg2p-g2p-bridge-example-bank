@@ -1,9 +1,5 @@
 from decimal import Decimal
 
-from mt940_writer import (
-    Account as MT940Account,
-)
-from mt940_writer import Balance, Statement, Transaction, TransactionType
 from openg2p_g2p_bridge_example_bank_models.models import (
     Account,
     AccountingLog,
@@ -68,12 +64,12 @@ def account_statement_generator(account_statement_id: int):
         currency = account.account_currency
         statement_date = account_statement.account_statement_date
         mt940_account = account.account_number
-        mt940_opening_balance = mt940_writer.create_balance(Decimal("100000000"), statement_date, currency)
+        mt940_opening_balance = mt940_writer.create_balance(
+            Decimal("100000000"), statement_date, currency
+        )
         mt940_closing_balance = mt940_writer.create_balance(
             Decimal(account.book_balance), statement_date, currency
         )
-
-
 
         transactions = []
         for account_log in account_logs:

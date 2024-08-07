@@ -91,11 +91,9 @@ class Mt940Writer(BaseService):
         return balance
 
     def format_balance(self, balance):
-        return '{category}{date}{currency_code}{amount}'.format(
-            category='C' if balance['amount'] >= 0 else 'D',
-            date=balance['date'].strftime('%y%m%d'),
-            currency_code=balance['currency_code'],
-            amount=f'{balance["amount"]:0.2f}'.replace('.', ',').replace('-', ''),
+        return "{category}{date}{currency_code}{amount}".format(
+            category="C" if balance["amount"] >= 0 else "D",
+            date=balance["date"].strftime("%y%m%d"),
+            currency_code=balance["currency_code"],
+            amount=f'{balance["amount"]:0.2f}'.replace(".", ",").replace("-", ""),
         )
-
-
