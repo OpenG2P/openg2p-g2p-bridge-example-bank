@@ -37,12 +37,20 @@ class FundBlock(BaseORMModelWithTimes):
     amount_released: Mapped[float] = mapped_column(Float, default=0)
 
 
+class InitiatePaymentBatchRequest(BaseORMModelWithTimes):
+    batch_id: Mapped[str] = mapped_column(String, index=True, unique=True)
+    payment_initiate_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    payment_status: Mapped[PaymentStatus] = mapped_column(
+        SqlEnum(PaymentStatus), default=PaymentStatus.PENDING
+    )
+
+
 class InitiatePaymentRequest(BaseORMModelWithTimes):
     __tablename__ = "initiate_payment_requests"
+    batch_id: Mapped[str] = mapped_column(String, index=True, unique=False)
     payment_reference_number = mapped_column(
         String, index=True, unique=True
     )  # disbursement id
-
     remitting_account: Mapped[str] = mapped_column(String, nullable=False)
     remitting_account_currency: Mapped[str] = mapped_column(String, nullable=False)
     payment_amount: Mapped[float] = mapped_column(Float, nullable=False)
@@ -77,15 +85,11 @@ class InitiatePaymentRequest(BaseORMModelWithTimes):
     narrative_5: Mapped[str] = mapped_column(String, nullable=True)
     narrative_6: Mapped[str] = mapped_column(String, nullable=True)
 
-    payment_initiate_attempts: Mapped[int] = mapped_column(Integer, default=0)
-    payment_status: Mapped[PaymentStatus] = mapped_column(
-        SqlEnum(PaymentStatus), default=PaymentStatus.PENDING
-    )
-
 
 class AccountingLog(BaseORMModelWithTimes):
     __tablename__ = "accounting_logs"
     reference_no: Mapped[str] = mapped_column(String, index=True, unique=True)
+    corresponding_block_reference_no: Mapped[str] = mapped_column(String, nullable=True)
     customer_reference_no: Mapped[str] = mapped_column(String, index=True)
     debit_credit: Mapped[DebitCreditTypes] = mapped_column(SqlEnum(DebitCreditTypes))
     account_number: Mapped[str] = mapped_column(String, index=True)
