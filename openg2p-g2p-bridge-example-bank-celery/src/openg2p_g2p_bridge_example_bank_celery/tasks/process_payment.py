@@ -26,6 +26,7 @@ _logger = logging.getLogger(_config.logging_default_logger_name)
 
 @celery_app.task(name="process_payments_beat_producer")
 def process_payments_beat_producer():
+    _logger.info("Processing payments")
     session_maker = sessionmaker(bind=_engine, expire_on_commit=False)
     with session_maker() as session:
         initiate_payment_batch_requests = (
@@ -43,17 +44,21 @@ def process_payments_beat_producer():
         )
 
         for initiate_payment_batch_request in initiate_payment_batch_requests:
+            _logger.info(
+                f"Initiating payment processing for batch: {initiate_payment_batch_request.batch_id}"
+            )
             celery_app.send_task(
                 "process_payments_worker",
                 args=[initiate_payment_batch_request.batch_id],
                 queue="g2p_bridge_celery_worker_tasks",
             )
-
+        _logger.info("Payments processing initiated")
         session.commit()
 
 
 @celery_app.task(name="process_payments_worker")
 def process_payments_worker(payment_request_batch_id: str):
+    _logger.info(f"Processing payments for batch: {payment_request_batch_id}")
     session_maker = sessionmaker(bind=_engine, expire_on_commit=False)
     with session_maker() as session:
         initiate_payment_batch_request = (
@@ -106,7 +111,7 @@ def process_payments_worker(payment_request_batch_id: str):
             # End of loop
 
             generate_failures(failure_logs, session)
-
+            _logger.info(f"Payments processed for batch: {payment_request_batch_id}")
             session.commit()
         except Exception as e:
             _logger.error(f"Error processing payment: {e}")
@@ -137,6 +142,7 @@ def construct_accounting_log(initiate_payment_request: InitiatePaymentRequest):
 
 
 def generate_failures(failure_logs: List[AccountingLog], session):
+    _logger.info("Generating failures")
     failure_reasons = [
         "ACCOUNT_CLOSED",
         "ACCOUNT_NOT_FOUND",

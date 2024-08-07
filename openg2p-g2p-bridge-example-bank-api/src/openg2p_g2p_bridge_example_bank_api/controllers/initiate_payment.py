@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import List
 
@@ -14,6 +15,11 @@ from openg2p_g2p_bridge_example_bank_models.schemas import (
 )
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
+
+from ..config import Settings
+
+_config = Settings.get_config()
+_logger = logging.getLogger(_config.logging_default_logger_name)
 
 
 class PaymentController(BaseController):
@@ -32,6 +38,7 @@ class PaymentController(BaseController):
     async def initiate_payment(
         self, initiate_payment_payloads: List[InitiatePaymentPayload]
     ) -> InitiatorPaymentResponse:
+        _logger.info("Initiating payment")
         session_maker = async_sessionmaker(dbengine.get(), expire_on_commit=False)
         async with session_maker() as session:
             batch_id = str(uuid.uuid4())
@@ -55,6 +62,9 @@ class PaymentController(BaseController):
                     or fund_block.currency
                     != initiate_payment_payload.remitting_account_currency
                 ):
+                    _logger.error(
+                        "Invalid funds block reference or mismatch in details"
+                    )
                     return InitiatorPaymentResponse(
                         status="failed",
                         error_message="Invalid funds block reference or mismatch in details",
@@ -90,5 +100,5 @@ class PaymentController(BaseController):
 
             session.add_all(initiate_payment_requests)
             await session.commit()
-
+            _logger.info("Payment initiated successfully")
             return InitiatorPaymentResponse(status="success", error_message="")

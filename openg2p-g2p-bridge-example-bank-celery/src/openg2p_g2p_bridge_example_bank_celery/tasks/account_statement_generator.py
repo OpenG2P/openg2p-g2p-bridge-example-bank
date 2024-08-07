@@ -16,9 +16,14 @@ from ..utils import Mt940Writer, TransactionType
 _config = Settings.get_config()
 _engine = get_engine()
 
+import logging
+
+_logger = logging.getLogger(_config.logging_default_logger_name)
+
 
 @celery_app.task(name="account_statement_generator")
 def account_statement_generator(account_statement_id: int):
+    _logger.info("Generating account statement")
     session_maker = sessionmaker(bind=_engine, expire_on_commit=False)
     with session_maker() as session:
         account_statement = (
@@ -32,6 +37,7 @@ def account_statement_generator(account_statement_id: int):
         )
 
         if not account_statement:
+            _logger.error("Account statement not found")
             return
 
         account = (
@@ -45,6 +51,7 @@ def account_statement_generator(account_statement_id: int):
         )
 
         if not account:
+            _logger.error("Account not found")
             return
 
         account_logs = (
@@ -58,6 +65,7 @@ def account_statement_generator(account_statement_id: int):
         )
 
         if not account_logs:
+            _logger.error("Account logs not found")
             return
 
         mt940_writer = Mt940Writer.get_component()
@@ -116,4 +124,5 @@ def account_statement_generator(account_statement_id: int):
         )
         mt940_statement = mt940_writer.format_statement(statement)
         account_statement.account_statement_lob = str(mt940_statement)
+        _logger.info("Account statement generated successfully")
         session.commit()
