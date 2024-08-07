@@ -1,9 +1,11 @@
+import uuid
 from typing import List
 
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
 from openg2p_g2p_bridge_example_bank_models.models import (
     FundBlock,
+    InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
 )
 from openg2p_g2p_bridge_example_bank_models.schemas import (
@@ -32,6 +34,13 @@ class PaymentController(BaseController):
     ) -> InitiatorPaymentResponse:
         session_maker = async_sessionmaker(dbengine.get(), expire_on_commit=False)
         async with session_maker() as session:
+            batch_id = str(uuid.uuid4())
+            initiate_payment_batch_request = InitiatePaymentBatchRequest(
+                batch_id=batch_id,
+                active=True,
+            )
+            session.add(initiate_payment_batch_request)
+            initiate_payment_requests = []
             for initiate_payment_payload in initiate_payment_payloads:
                 fund_block_stmt = select(FundBlock).where(
                     FundBlock.block_reference_no
@@ -51,7 +60,8 @@ class PaymentController(BaseController):
                         error_message="Invalid funds block reference or mismatch in details",
                     )
 
-                payment = InitiatePaymentRequest(
+                initiate_payment_request = InitiatePaymentRequest(
+                    batch_id=batch_id,
                     payment_reference_number=initiate_payment_payload.payment_reference_number,
                     remitting_account=initiate_payment_payload.remitting_account,
                     remitting_account_currency=initiate_payment_payload.remitting_account_currency,
@@ -76,8 +86,9 @@ class PaymentController(BaseController):
                     narrative_6=initiate_payment_payload.narrative_6,
                     active=True,
                 )
-                session.add(payment)
+                initiate_payment_requests.append(initiate_payment_request)
 
+            session.add_all(initiate_payment_requests)
             await session.commit()
 
             return InitiatorPaymentResponse(status="success", error_message="")
