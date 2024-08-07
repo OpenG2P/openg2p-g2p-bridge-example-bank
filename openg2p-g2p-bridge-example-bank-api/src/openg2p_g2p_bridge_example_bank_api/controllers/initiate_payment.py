@@ -11,7 +11,7 @@ from openg2p_g2p_bridge_example_bank_models.models import (
 )
 from openg2p_g2p_bridge_example_bank_models.schemas import (
     InitiatePaymentPayload,
-    InitiatorPaymentResponse,
+    InitiatePaymentResponse,
 )
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
@@ -31,13 +31,13 @@ class PaymentController(BaseController):
         self.router.add_api_route(
             "/initiate_payment",
             self.initiate_payment,
-            response_model=InitiatorPaymentResponse,
+            response_model=InitiatePaymentResponse,
             methods=["POST"],
         )
 
     async def initiate_payment(
         self, initiate_payment_payloads: List[InitiatePaymentPayload]
-    ) -> InitiatorPaymentResponse:
+    ) -> InitiatePaymentResponse:
         _logger.info("Initiating payment")
         session_maker = async_sessionmaker(dbengine.get(), expire_on_commit=False)
         async with session_maker() as session:
@@ -65,7 +65,7 @@ class PaymentController(BaseController):
                     _logger.error(
                         "Invalid funds block reference or mismatch in details"
                     )
-                    return InitiatorPaymentResponse(
+                    return InitiatePaymentResponse(
                         status="failed",
                         error_message="Invalid funds block reference or mismatch in details",
                     )
@@ -101,4 +101,4 @@ class PaymentController(BaseController):
             session.add_all(initiate_payment_requests)
             await session.commit()
             _logger.info("Payment initiated successfully")
-            return InitiatorPaymentResponse(status="success", error_message="")
+            return InitiatePaymentResponse(status="success", error_message="")
