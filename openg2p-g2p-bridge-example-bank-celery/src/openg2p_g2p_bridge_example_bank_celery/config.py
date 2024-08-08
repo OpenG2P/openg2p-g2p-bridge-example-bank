@@ -20,5 +20,5 @@ class Settings(BaseSettings):
     db_dbname: str = "example_bank_db"
     db_driver: str = "postgresql"
 
-    process_payment_frequency: int = 10
+    process_payment_frequency: int = 3600
     payment_initiate_attempts: int = 3

@@ -2,8 +2,8 @@
 import logging
 
 from .config import Settings
-_config = Settings.get_config()
 
+_config = Settings.get_config()
 
 from celery import Celery
 from openg2p_fastapi_common.app import Initializer as BaseInitializer
@@ -13,6 +13,8 @@ from openg2p_g2p_bridge_example_bank_api.controllers import (
     PaymentController,
 )
 from sqlalchemy import create_engine
+
+from .utils import Mt940Writer
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
 
@@ -36,7 +38,7 @@ celery_app = Celery(
     "example_bank_celery_tasks",
     broker="redis://localhost:6379/0",
     backend="redis://localhost:6379/0",
-    include=["openg2p_g2p_bridge_example_bank_celery.tasks.process_payment"],
+    include=["openg2p_g2p_bridge_example_bank_celery.tasks"],
 )
 
 celery_app.conf.beat_schedule = {
@@ -47,3 +49,5 @@ celery_app.conf.beat_schedule = {
 }
 
 celery_app.conf.timezone = "UTC"
+# Initialize the Mt940Writer here
+Mt940Writer()

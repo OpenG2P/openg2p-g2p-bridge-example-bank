@@ -5,16 +5,20 @@ import logging
 from openg2p_g2p_bridge_example_bank_api.config import Settings
 
 _config = Settings.get_config()
-
 from openg2p_fastapi_common.app import Initializer as BaseInitializer
+from openg2p_g2p_bridge_example_bank_models.models import (
+    Account,
+    FundBlock,
+    InitiatePaymentRequest,
+)
 from sqlalchemy import create_engine
 
 from openg2p_g2p_bridge_example_bank_api.controllers import (
+    AccountStatementController,
     BlockFundsController,
     FundAvailabilityController,
     PaymentController,
 )
-from openg2p_g2p_bridge_example_bank_models.models import Account, FundBlock, InitiatePaymentRequest
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
 
@@ -26,6 +30,7 @@ class Initializer(BaseInitializer):
         BlockFundsController().post_init()
         FundAvailabilityController().post_init()
         PaymentController().post_init()
+        AccountStatementController().post_init()
 
     def migrate_database(self, args):
         super().migrate_database(args)

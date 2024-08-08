@@ -3,31 +3,6 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class CheckFundRequest(BaseModel):
-    account_number: str
-    account_currency: str
-    total_funds_needed: float
-
-
-class CheckFundResponse(BaseModel):
-    status: str
-    account_number: str
-    has_sufficient_funds: bool
-    error_message: Optional[str] = None
-
-
-class BlockFundsRequest(BaseModel):
-    account_no: str
-    currency: str
-    amount: float
-
-
-class BlockFundsResponse(BaseModel):
-    status: str
-    block_reference_no: str
-    error_message: Optional[str] = None
-
-
 class InitiatePaymentPayload(BaseModel):
     payment_reference_number: str
     remitting_account: str
@@ -58,6 +33,6 @@ class InitiatePaymentPayload(BaseModel):
     payment_date: str
 
 
-class InitiatorPaymentResponse(BaseModel):
+class InitiatePaymentResponse(BaseModel):
     status: str
     error_message: Optional[str] = None

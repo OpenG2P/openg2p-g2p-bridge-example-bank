@@ -1,10 +1,19 @@
+import logging
+
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
+from openg2p_g2p_bridge_example_bank_models.models import Account
+from openg2p_g2p_bridge_example_bank_models.schemas import (
+    CheckFundRequest,
+    CheckFundResponse,
+)
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
 
-from openg2p_g2p_bridge_example_bank_models.models import Account
-from openg2p_g2p_bridge_example_bank_models.schemas import CheckFundRequest, CheckFundResponse
+from ..config import Settings
+
+_config = Settings.get_config()
+_logger = logging.getLogger(_config.logging_default_logger_name)
 
 
 class FundAvailabilityController(BaseController):
@@ -23,6 +32,7 @@ class FundAvailabilityController(BaseController):
     async def check_available_funds(
         self, request: CheckFundRequest
     ) -> CheckFundResponse:
+        _logger.info("Checking available funds")
         session_maker = async_sessionmaker(dbengine.get(), expire_on_commit=False)
         async with session_maker() as session:
             stmt = select(Account).where(
@@ -32,6 +42,7 @@ class FundAvailabilityController(BaseController):
             account = result.scalars().first()
 
             if not account:
+                _logger.error("Account not found")
                 return CheckFundResponse(
                     status="failed",
                     account_number=request.account_number,
@@ -40,6 +51,7 @@ class FundAvailabilityController(BaseController):
                 )
 
             if account.available_balance >= request.total_funds_needed:
+                _logger.info("Sufficient funds")
                 return CheckFundResponse(
                     status="success",
                     account_number=account.account_number,
@@ -47,6 +59,7 @@ class FundAvailabilityController(BaseController):
                     error_message="",
                 )
             else:
+                _logger.error("Insufficient funds")
                 return CheckFundResponse(
                     status="failed",
                     account_number=account.account_number,

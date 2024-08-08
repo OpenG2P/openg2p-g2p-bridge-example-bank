@@ -1,12 +1,25 @@
+import logging
+import uuid
 from typing import List
 
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
+from openg2p_g2p_bridge_example_bank_models.models import (
+    FundBlock,
+    InitiatePaymentBatchRequest,
+    InitiatePaymentRequest,
+)
+from openg2p_g2p_bridge_example_bank_models.schemas import (
+    InitiatePaymentPayload,
+    InitiatePaymentResponse,
+)
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
 
-from openg2p_g2p_bridge_example_bank_models.models import FundBlock, InitiatePaymentRequest
-from openg2p_g2p_bridge_example_bank_models.schemas import InitiatePaymentPayload, InitiatorPaymentResponse
+from ..config import Settings
+
+_config = Settings.get_config()
+_logger = logging.getLogger(_config.logging_default_logger_name)
 
 
 class PaymentController(BaseController):
@@ -18,15 +31,23 @@ class PaymentController(BaseController):
         self.router.add_api_route(
             "/initiate_payment",
             self.initiate_payment,
-            response_model=InitiatorPaymentResponse,
+            response_model=InitiatePaymentResponse,
             methods=["POST"],
         )
 
     async def initiate_payment(
         self, initiate_payment_payloads: List[InitiatePaymentPayload]
-    ) -> InitiatorPaymentResponse:
+    ) -> InitiatePaymentResponse:
+        _logger.info("Initiating payment")
         session_maker = async_sessionmaker(dbengine.get(), expire_on_commit=False)
         async with session_maker() as session:
+            batch_id = str(uuid.uuid4())
+            initiate_payment_batch_request = InitiatePaymentBatchRequest(
+                batch_id=batch_id,
+                active=True,
+            )
+            session.add(initiate_payment_batch_request)
+            initiate_payment_requests = []
             for initiate_payment_payload in initiate_payment_payloads:
                 fund_block_stmt = select(FundBlock).where(
                     FundBlock.block_reference_no
@@ -41,12 +62,16 @@ class PaymentController(BaseController):
                     or fund_block.currency
                     != initiate_payment_payload.remitting_account_currency
                 ):
-                    return InitiatorPaymentResponse(
+                    _logger.error(
+                        "Invalid funds block reference or mismatch in details"
+                    )
+                    return InitiatePaymentResponse(
                         status="failed",
                         error_message="Invalid funds block reference or mismatch in details",
                     )
 
-                payment = InitiatePaymentRequest(
+                initiate_payment_request = InitiatePaymentRequest(
+                    batch_id=batch_id,
                     payment_reference_number=initiate_payment_payload.payment_reference_number,
                     remitting_account=initiate_payment_payload.remitting_account,
                     remitting_account_currency=initiate_payment_payload.remitting_account_currency,
@@ -71,8 +96,9 @@ class PaymentController(BaseController):
                     narrative_6=initiate_payment_payload.narrative_6,
                     active=True,
                 )
-                session.add(payment)
+                initiate_payment_requests.append(initiate_payment_request)
 
+            session.add_all(initiate_payment_requests)
             await session.commit()
-
-            return InitiatorPaymentResponse(status="success", error_message="")
+            _logger.info("Payment initiated successfully")
+            return InitiatePaymentResponse(status="success", error_message="")
