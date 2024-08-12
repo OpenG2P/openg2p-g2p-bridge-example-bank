@@ -16,8 +16,9 @@ classifiers = [
   "Operating System :: OS Independent",
 ]
 dependencies = [
-  "openg2p-fastapi-common",
-  "openg2p-fastapi-auth",
+    "openg2p-fastapi-common",
+    "openg2p-fastapi-auth",
+    "celery",
 ]
 dynamic = ["version"]
 
