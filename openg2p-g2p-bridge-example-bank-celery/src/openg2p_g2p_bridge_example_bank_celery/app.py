@@ -43,7 +43,7 @@ celery_app = Celery(
 
 celery_app.conf.beat_schedule = {
     "process_payments": {
-        "task": "process_payments",
+        "task": "process_payments_beat_producer",
         "schedule": _config.process_payment_frequency,
     }
 }

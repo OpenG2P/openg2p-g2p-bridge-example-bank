@@ -1,0 +1,51 @@
+name: Test and coverage
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test with ${{ matrix.py }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.10"
+        os:
+          - ubuntu-latest
+    services:
+      postgres:
+        image: postgres:9.6
+        env:
+          POSTGRES_USER: openg2p
+          POSTGRES_PASSWORD: openg2p
+          POSTGRES_DB: openg2p
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup python for test ${{ matrix.py }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Install test requirements
+        run: |
+          python -m pip install -r test-requirements.txt
+          python -m pip install -e openg2p-g2p-bridge-example-bank-api
+#          TODO: add other packages here
+      - name: Run test suite
+        run: |
+          pytest --cov-branch --cov-report=term-missing --cov=openg2p-g2p-bridge-example-bank-api --cov=tests
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
