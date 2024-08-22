@@ -7,11 +7,6 @@ _config = Settings.get_config()
 
 from celery import Celery
 from openg2p_fastapi_common.app import Initializer as BaseInitializer
-from openg2p_g2p_bridge_example_bank_api.controllers import (
-    BlockFundsController,
-    FundAvailabilityController,
-    PaymentController,
-)
 from sqlalchemy import create_engine
 
 from .utils import Mt940Writer
@@ -22,11 +17,6 @@ _logger = logging.getLogger(_config.logging_default_logger_name)
 class Initializer(BaseInitializer):
     def initialize(self, **kwargs):
         super().initialize()
-
-        BlockFundsController().post_init()
-        FundAvailabilityController().post_init()
-        PaymentController().post_init()
-
 
 def get_engine():
     if _config.db_datasource:
