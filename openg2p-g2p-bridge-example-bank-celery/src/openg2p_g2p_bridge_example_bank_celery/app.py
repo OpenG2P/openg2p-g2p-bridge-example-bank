@@ -18,6 +18,7 @@ class Initializer(BaseInitializer):
     def initialize(self, **kwargs):
         super().initialize()
 
+
 def get_engine():
     if _config.db_datasource:
         db_engine = create_engine(_config.db_datasource)
