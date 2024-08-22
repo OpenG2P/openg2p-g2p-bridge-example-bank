@@ -1,4 +1,4 @@
-FROM bitnami/python:3.10.13-debian-11-r24
+FROM bitnami/python:3.12.5-debian-12-r0
 
 ARG container_user=openg2p
 ARG container_user_group=openg2p
@@ -14,7 +14,6 @@ RUN install_packages libpq-dev \
   && apt-get clean && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 RUN chown -R ${container_user}:${container_user_group} /app
-USER ${container_user}
 
 ADD --chown=${container_user}:${container_user_group} . /app/src
 ADD --chown=${container_user}:${container_user_group} main.py /app
@@ -27,5 +26,7 @@ RUN python3 -m pip install  \
     git+https://github.com/openg2p/openg2p-g2p-bridge-example-bank@1.0.0\#subdirectory=openg2p-g2p-bridge-example-bank-models \
     ./src
 
+USER ${container_user}
+
 CMD python3 main.py migrate; \
-    gunicorn "openg2p-g2p-bridge-example-bank-api.main:app" --workers ${SPAR_MAPPER_NO_OF_WORKERS} --worker-class uvicorn.workers.UvicornWorker --bind ${SPAR_MAPPER_HOST}:${SPAR_MAPPER_PORT}
+    gunicorn "main:app" --workers ${EXAMPLE_BANK_NO_OF_WORKERS} --worker-class uvicorn.workers.UvicornWorker --bind ${EXAMPLE_BANK_HOST}:${EXAMPLE_BANK_PORT}
