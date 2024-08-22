@@ -26,9 +26,9 @@ jobs:
           python -m pip install -e openg2p-g2p-bridge-api/
       - name: Generate openapi json
         run: |
-          mkdir -p openg2p-g2p-bridge-api/api-docs/generated
-          python3 openg2p-g2p-bridge-api/main.py getOpenAPI openg2p-g2p-bridge-api/api-docs/generated/openapi.json
-          if ! [ -z "$(git status --porcelain=v1 2>/dev/null -- openg2p-g2p-bridge-api/api-docs/generated/openapi.json)" ]; then
+          mkdir -p openg2p-g2p-bridge-example-bank-api/api-docs/generated
+          python3 openg2p-g2p-bridge-example-bank-api/main.py getOpenAPI openg2p-g2p-bridge-example-bank-api/api-docs/generated/openapi.json
+          if ! [ -z "$(git status --porcelain=v1 2>/dev/null -- openg2p-g2p-bridge-example-bank-api/api-docs/generated/openapi.json)" ]; then
             shopt -s nocasematch
             if [[ ${{ github.repository_owner }} == 'OpenG2P' ]]; then
               export OPENAPI_CHANGED="true"
@@ -41,7 +41,7 @@ jobs:
         with:
           default_author: github_actions
           message: "Generated new openapi.json on push to ${{ github.event.inputs.git-ref }}"
-          add: "openg2p-g2p-bridge-api/api-docs/generated/openapi.json"
+          add: "openg2p-g2p-bridge-example-bank-api/api-docs/generated/openapi.json"
       - name: Setup nodejs
         uses: actions/setup-node@v4
         if: env.OPENAPI_CHANGED == 'true'
@@ -50,4 +50,4 @@ jobs:
       - name: Publish to stoplight
         if: env.OPENAPI_CHANGED == 'true'
         run: |
-          npx @stoplight/cli@5 push --ci-token ${{ secrets.STOPLIGHT_PROJECT_TOKEN }} --url https://openg2p.stoplight.io --branch ${{ env.BRANCH_NAME }} --directory openg2p-g2p-bridge-api/api-docs/generated
+          npx @stoplight/cli@5 push --ci-token ${{ secrets.STOPLIGHT_PROJECT_TOKEN }} --url https://openg2p.stoplight.io --branch ${{ env.BRANCH_NAME }} --directory openg2p-g2p-bridge-example-bank-api/api-docs/generated
