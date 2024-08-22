@@ -20,5 +20,8 @@ class Settings(BaseSettings):
     db_dbname: str = "example_bank_db"
     db_driver: str = "postgresql"
 
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_backend_url: str = "redis://localhost:6379/0"
+
     process_payment_frequency: int = 3600
     payment_initiate_attempts: int = 3

@@ -36,8 +36,8 @@ def get_engine():
 
 celery_app = Celery(
     "example_bank_celery_tasks",
-    broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/0",
+    broker=_config.celery_broker_url,
+    backend=_config.celery_backend_url,
     include=["openg2p_g2p_bridge_example_bank_celery.tasks"],
 )
 
