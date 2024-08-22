@@ -14,7 +14,6 @@ RUN install_packages libpq-dev \
   && apt-get clean && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 RUN chown -R ${container_user}:${container_user_group} /app
-USER ${container_user}
 
 ADD --chown=${container_user}:${container_user_group} . /app/src
 ADD --chown=${container_user}:${container_user_group} main.py /app
@@ -25,7 +24,9 @@ RUN python3 -m pip install  \
     git+https://github.com/openg2p/openg2p-fastapi-common@1.1.0\#subdirectory=openg2p-fastapi-common \
     git+https://github.com/openg2p/openg2p-fastapi-common@1.1.0\#subdirectory=openg2p-fastapi-auth \
     git+https://github.com/openg2p/openg2p-g2p-bridge-example-bank@1.0.0\#subdirectory=openg2p-g2p-bridge-example-bank-models \
-    ./src
+    ./src \
+
+USER ${container_user}
 
 CMD python3 main.py migrate; \
     celery -A main.celery_app worker --loglevel=info --beat
