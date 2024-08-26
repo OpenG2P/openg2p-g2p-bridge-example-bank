@@ -97,8 +97,6 @@ def process_payments_worker(payment_request_batch_id: str):
                     initiate_payment_request.payment_amount,
                     session,
                 )
-                initiate_payment_request.payment_status = PaymentStatus.SUCCESS
-                initiate_payment_request.payment_initiate_attempts += 1
 
                 failure_random_number = random.randint(1, 100)
                 if failure_random_number <= 30:
@@ -111,6 +109,8 @@ def process_payments_worker(payment_request_batch_id: str):
             # End of loop
 
             generate_failures(failure_logs, session)
+            initiate_payment_batch_request.payment_initiate_attempts += 1
+            initiate_payment_batch_request.payment_status = PaymentStatus.PROCESSED
             _logger.info(f"Payments processed for batch: {payment_request_batch_id}")
             session.commit()
         except Exception as e:

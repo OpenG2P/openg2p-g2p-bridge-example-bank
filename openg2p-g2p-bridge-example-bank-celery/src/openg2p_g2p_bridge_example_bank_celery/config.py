@@ -6,10 +6,10 @@ from . import __version__
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="example_bank_", env_file=".env", extra="allow"
+        env_prefix="example_bank_celery_", env_file=".env", extra="allow"
     )
 
-    openapi_title: str = "Example Bank APIs for Cash Transfer"
+    openapi_title: str = "Example Bank Celery Tasks for Cash Transfer"
     openapi_description: str = """
         ***********************************
         Further details goes here
