@@ -29,4 +29,5 @@ RUN python3 -m pip install  \
 USER ${container_user}
 
 CMD python3 main.py migrate; \
-    celery -A main.celery_app worker --loglevel=info --beat
+    celery -A main.celery_app worker --loglevel=info --beat & \
+    celery -A main.celery_app worker --loglevel=info -Q g2p_bridge_celery_worker_tasks
