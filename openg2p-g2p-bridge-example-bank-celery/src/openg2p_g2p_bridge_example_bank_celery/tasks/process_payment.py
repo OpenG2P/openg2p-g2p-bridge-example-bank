@@ -110,7 +110,7 @@ def process_payments_worker(payment_request_batch_id: str):
 
             generate_failures(failure_logs, session)
             initiate_payment_batch_request.payment_initiate_attempts += 1
-            initiate_payment_batch_request.payment_status = PaymentStatus.PROCESSED
+            initiate_payment_batch_request.payment_status = PaymentStatus.SUCCESS
             _logger.info(f"Payments processed for batch: {payment_request_batch_id}")
             session.commit()
         except Exception as e:
