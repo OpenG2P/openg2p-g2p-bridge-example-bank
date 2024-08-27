@@ -1,4 +1,5 @@
 from celery import Celery
+
 from .config import Settings
 
 _config = Settings.get_config()
