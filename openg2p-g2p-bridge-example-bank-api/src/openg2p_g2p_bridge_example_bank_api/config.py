@@ -18,3 +18,6 @@ class Settings(BaseSettings):
     openapi_version: str = __version__
 
     db_dbname: str = "example_bank_db"
+
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_backend_url: str = "redis://localhost:6379/0"
