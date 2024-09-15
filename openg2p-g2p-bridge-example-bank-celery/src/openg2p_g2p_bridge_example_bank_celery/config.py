@@ -25,3 +25,5 @@ class Settings(BaseSettings):
 
     process_payment_frequency: int = 3600
     payment_initiate_attempts: int = 3
+
+    mt940_statement_callback_url: str = "http://localhost:8000/upload_mt940_statement"
