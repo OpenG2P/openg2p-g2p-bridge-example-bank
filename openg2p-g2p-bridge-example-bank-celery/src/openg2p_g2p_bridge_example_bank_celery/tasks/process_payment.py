@@ -133,9 +133,11 @@ def process_payments_worker(payment_request_batch_id: str):
             session.commit()
         except Exception as e:
             _logger.error(f"Error processing payment: {e}")
+            session.rollback()
             initiate_payment_batch_request.payment_status = PaymentStatus.PENDING
             initiate_payment_batch_request.payment_initiate_attempts += 1
             session.commit()
+
 
 
 def construct_accounting_log_for_debit(
@@ -232,7 +234,9 @@ def generate_failures(failure_logs: List[AccountingLog], session):
             )
         else:
             account = update_account_for_credit(
+                None,
                 account_log.account_number,
+                None,
                 None,
                 None,
                 account_log.transaction_amount,
