@@ -1,6 +1,8 @@
+import io
 import logging
 from decimal import Decimal
 
+import requests
 from openg2p_g2p_bridge_example_bank_models.models import (
     Account,
     AccountingLog,
@@ -126,3 +128,17 @@ def account_statement_generator(account_statement_id: int):
         account_statement.account_statement_lob = str(mt940_statement)
         _logger.info("Account statement generated successfully")
         session.commit()
+
+        # Prepare the in-memory file
+        mt940_file = io.StringIO(str(mt940_statement))
+
+        # Prepare the files dictionary for the request
+        files = {
+            "statement_file": ("statement.mt940", mt940_file.getvalue(), "text/plain")
+        }
+        try:
+            response = requests.post(_config.mt940_statement_callback_url, files=files)
+            response.raise_for_status()
+            _logger.info("MT940 statement uploaded successfully")
+        except requests.exceptions.RequestException as e:
+            _logger.error(f"Failed to upload MT940 statement: {e}")
