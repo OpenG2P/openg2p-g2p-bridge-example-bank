@@ -19,6 +19,7 @@ dependencies = [
     "openg2p-fastapi-common",
     "openg2p-fastapi-auth",
     "celery",
+    "requests"
 ]
 dynamic = ["version"]
 
