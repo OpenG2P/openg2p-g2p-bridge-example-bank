@@ -232,7 +232,9 @@ def generate_failures(failure_logs: List[AccountingLog], session):
             )
         else:
             account = update_account_for_credit(
+                None,
                 account_log.account_number,
+                None,
                 None,
                 None,
                 account_log.transaction_amount,
