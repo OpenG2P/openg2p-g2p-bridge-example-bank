@@ -83,28 +83,44 @@ def process_payments_worker(payment_request_batch_id: str):
 
             failure_logs = []
             for initiate_payment_request in initiate_payment_requests:
-                accounting_log: AccountingLog = construct_accounting_log(
-                    initiate_payment_request
+                accounting_log_debit: AccountingLog = (
+                    construct_accounting_log_for_debit(initiate_payment_request)
+                )
+                accounting_log_credit: AccountingLog = (
+                    construct_accounting_log_for_credit(initiate_payment_request)
                 )
 
-                account = update_account(
-                    initiate_payment_request.remitting_account,
+                remitting_account = update_account_for_debit(
+                    accounting_log_debit.account_number,
                     initiate_payment_request.payment_amount,
                     session,
                 )
                 fund_block = update_fund_block(
-                    accounting_log.corresponding_block_reference_no,
+                    accounting_log_debit.corresponding_block_reference_no,
                     initiate_payment_request.payment_amount,
                     session,
                 )
 
+                credit_account = update_account_for_credit(
+                    accounting_log_credit.account_number,
+                    initiate_payment_request.mobile_number,
+                    initiate_payment_request.email_address,
+                    initiate_payment_request.payment_amount,
+                    session,
+                )
                 failure_random_number = random.randint(1, 100)
-                if failure_random_number <= 30:
-                    failure_logs.append(accounting_log)
+                if (
+                    failure_random_number <= 30
+                    and initiate_payment_request.beneficiary_bank_code != "EXAMPLE_BANK"
+                ):
+                    failure_logs.append(accounting_log_debit)
+                    failure_logs.append(accounting_log_credit)
 
-                session.add(accounting_log)
+                session.add(accounting_log_debit)
+                session.add(accounting_log_credit)
                 session.add(fund_block)
-                session.add(account)
+                session.add(remitting_account)
+                session.add(credit_account)
 
             # End of loop
 
@@ -120,7 +136,9 @@ def process_payments_worker(payment_request_batch_id: str):
             session.commit()
 
 
-def construct_accounting_log(initiate_payment_request: InitiatePaymentRequest):
+def construct_accounting_log_for_debit(
+    initiate_payment_request: InitiatePaymentRequest,
+):
     return AccountingLog(
         reference_no=str(uuid.uuid4()),
         corresponding_block_reference_no=initiate_payment_request.funds_blocked_reference_number,
@@ -139,6 +157,45 @@ def construct_accounting_log(initiate_payment_request: InitiatePaymentRequest):
         narrative_6=initiate_payment_request.narrative_6,
         active=True,
     )
+
+
+def construct_accounting_log_for_credit(
+    initiate_payment_request: InitiatePaymentRequest,
+):
+    return AccountingLog(
+        reference_no=str(uuid.uuid4()),
+        corresponding_block_reference_no="",
+        customer_reference_no=initiate_payment_request.payment_reference_number,
+        debit_credit=DebitCreditTypes.CREDIT,
+        account_number=construct_credit_account_number(initiate_payment_request),
+        transaction_amount=initiate_payment_request.payment_amount,
+        transaction_date=datetime.utcnow(),
+        transaction_currency=initiate_payment_request.remitting_account_currency,
+        transaction_code="DBT",
+        narrative_1=initiate_payment_request.narrative_1,
+        narrative_2=initiate_payment_request.narrative_2,
+        narrative_3=initiate_payment_request.narrative_3,
+        narrative_4=initiate_payment_request.narrative_4,
+        narrative_5=initiate_payment_request.narrative_5,
+        narrative_6=initiate_payment_request.narrative_6,
+        active=True,
+    )
+
+
+def construct_credit_account_number(initiate_payment_request: InitiatePaymentRequest):
+    if initiate_payment_request.beneficiary_account_type == "MOBILE_WALLET":
+        return (
+            f"CLEARING - {initiate_payment_request.beneficiary_mobile_wallet_provider}"
+        )
+    elif initiate_payment_request.beneficiary_account_type == "EMAIL_WALLET":
+        return (
+            f"CLEARING - {initiate_payment_request.beneficiary_email_wallet_provider}"
+        )
+    elif initiate_payment_request.beneficiary_account_type == "BANK_ACCOUNT":
+        if initiate_payment_request.beneficiary_bank_code == "EXAMPLE_BANK":
+            return initiate_payment_request.beneficiary_account
+        else:
+            return f"CLEARING - {initiate_payment_request.beneficiary_bank_code}"
 
 
 def generate_failures(failure_logs: List[AccountingLog], session):
@@ -167,10 +224,19 @@ def generate_failures(failure_logs: List[AccountingLog], session):
             narrative_6=random.choice(failure_reasons),
             active=True,
         )
+        if failure_log.debit_credit == DebitCreditTypes.DEBIT:
+            account = update_account_for_debit(
+                account_log.account_number, account_log.transaction_amount, session
+            )
+        else:
+            account = update_account_for_credit(
+                account_log.account_number,
+                None,
+                None,
+                account_log.transaction_amount,
+                session,
+            )
 
-        account = update_account(
-            account_log.account_number, account_log.transaction_amount, session
-        )
         fund_block = update_fund_block(
             failure_log.corresponding_block_reference_no,
             account_log.transaction_amount,
@@ -182,7 +248,9 @@ def generate_failures(failure_logs: List[AccountingLog], session):
         session.add(fund_block)
 
 
-def update_account(remitting_account_number, payment_amount, session) -> Account:
+def update_account_for_debit(
+    remitting_account_number, payment_amount, session
+) -> Account:
     account = (
         session.execute(
             select(Account).where(Account.account_number == remitting_account_number)
@@ -192,6 +260,36 @@ def update_account(remitting_account_number, payment_amount, session) -> Account
     )
     account.book_balance -= payment_amount
     account.blocked_amount -= payment_amount
+    account.available_balance = account.book_balance - account.blocked_amount
+    return account
+
+
+def update_account_for_credit(
+    credit_account_number,
+    account_holder_phone,
+    account_holder_email,
+    payment_amount,
+    session,
+) -> Account:
+    account = (
+        session.execute(
+            select(Account).where(Account.account_number == credit_account_number)
+        )
+        .scalars()
+        .first()
+    )
+    if not account:
+        account = Account(
+            account_number=credit_account_number,
+            book_balance=0,
+            available_balance=0,
+            blocked_amount=0,
+            account_holder_phone=account_holder_phone,
+            account_holder_email=account_holder_email,
+            active=True,
+        )
+        session.add(account)
+    account.book_balance += payment_amount
     account.available_balance = account.book_balance - account.blocked_amount
     return account
 
