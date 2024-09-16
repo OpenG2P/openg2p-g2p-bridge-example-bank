@@ -8,3 +8,6 @@ from .check_available_funds import (
 from .initiate_payment import (
     PaymentController,
 )
+from .ussd_controller import (
+    USSDController,
+)
