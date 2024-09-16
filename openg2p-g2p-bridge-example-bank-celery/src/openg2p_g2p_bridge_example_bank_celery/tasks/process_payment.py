@@ -232,6 +232,12 @@ def generate_failures(failure_logs: List[AccountingLog], session):
             account = update_account_for_debit(
                 account_log.account_number, account_log.transaction_amount, session
             )
+            fund_block = update_fund_block(
+                failure_log.corresponding_block_reference_no,
+                account_log.transaction_amount,
+                session,
+            )
+            session.add(fund_block)
         else:
             account = update_account_for_credit(
                 None,
@@ -243,15 +249,8 @@ def generate_failures(failure_logs: List[AccountingLog], session):
                 session,
             )
 
-        fund_block = update_fund_block(
-            failure_log.corresponding_block_reference_no,
-            account_log.transaction_amount,
-            session,
-        )
-
         session.add(account_log)
         session.add(account)
-        session.add(fund_block)
 
 
 def update_account_for_debit(
