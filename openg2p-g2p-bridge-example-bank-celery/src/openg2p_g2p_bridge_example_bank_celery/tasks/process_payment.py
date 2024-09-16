@@ -106,6 +106,7 @@ def process_payments_worker(payment_request_batch_id: str):
                     accounting_log_credit.account_number,
                     initiate_payment_request.beneficiary_phone_no,
                     initiate_payment_request.beneficiary_email,
+                    initiate_payment_request.beneficiary_account_currency,
                     initiate_payment_request.payment_amount,
                     session,
                 )
@@ -270,6 +271,7 @@ def update_account_for_credit(
     credit_account_number,
     account_holder_phone,
     account_holder_email,
+    remitting_currency,
     payment_amount,
     session,
 ) -> Account:
@@ -289,6 +291,7 @@ def update_account_for_credit(
             blocked_amount=0,
             account_holder_phone=account_holder_phone,
             account_holder_email=account_holder_email,
+            account_currency=remitting_currency,
             active=True,
         )
         session.add(account)
