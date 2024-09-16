@@ -18,6 +18,7 @@ from openg2p_g2p_bridge_example_bank_api.controllers import (
     BlockFundsController,
     FundAvailabilityController,
     PaymentController,
+    USSDController,
 )
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
@@ -31,6 +32,7 @@ class Initializer(BaseInitializer):
         FundAvailabilityController().post_init()
         PaymentController().post_init()
         AccountStatementController().post_init()
+        USSDController().post_init()
 
     def migrate_database(self, args):
         super().migrate_database(args)
