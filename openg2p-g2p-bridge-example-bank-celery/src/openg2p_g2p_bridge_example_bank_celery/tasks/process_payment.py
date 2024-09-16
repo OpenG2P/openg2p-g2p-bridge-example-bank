@@ -102,6 +102,7 @@ def process_payments_worker(payment_request_batch_id: str):
                 )
 
                 credit_account = update_account_for_credit(
+                    initiate_payment_request.beneficiary_name,
                     accounting_log_credit.account_number,
                     initiate_payment_request.beneficiary_phone_no,
                     initiate_payment_request.beneficiary_email,
@@ -265,6 +266,7 @@ def update_account_for_debit(
 
 
 def update_account_for_credit(
+    beneficiary_name,
     credit_account_number,
     account_holder_phone,
     account_holder_email,
@@ -280,6 +282,7 @@ def update_account_for_credit(
     )
     if not account:
         account = Account(
+            account_holder_name=beneficiary_name,
             account_number=credit_account_number,
             book_balance=0,
             available_balance=0,
