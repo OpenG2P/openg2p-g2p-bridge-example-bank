@@ -139,7 +139,6 @@ def process_payments_worker(payment_request_batch_id: str):
             session.commit()
 
 
-
 def construct_accounting_log_for_debit(
     initiate_payment_request: InitiatePaymentRequest,
 ):
