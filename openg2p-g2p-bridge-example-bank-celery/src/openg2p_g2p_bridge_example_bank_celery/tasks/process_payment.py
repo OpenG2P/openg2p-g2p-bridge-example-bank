@@ -103,8 +103,8 @@ def process_payments_worker(payment_request_batch_id: str):
 
                 credit_account = update_account_for_credit(
                     accounting_log_credit.account_number,
-                    initiate_payment_request.mobile_number,
-                    initiate_payment_request.email_address,
+                    initiate_payment_request.beneficiary_phone_no,
+                    initiate_payment_request.beneficiary_email,
                     initiate_payment_request.payment_amount,
                     session,
                 )
