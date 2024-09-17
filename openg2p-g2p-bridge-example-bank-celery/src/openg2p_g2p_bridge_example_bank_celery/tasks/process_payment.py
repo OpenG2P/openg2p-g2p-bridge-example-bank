@@ -7,6 +7,7 @@ from typing import List
 from openg2p_g2p_bridge_example_bank_models.models import (
     Account,
     AccountingLog,
+    AccountStatement,
     DebitCreditTypes,
     FundBlock,
     InitiatePaymentBatchRequest,
@@ -86,8 +87,17 @@ def process_payments_worker(payment_request_batch_id: str):
                 accounting_log_debit: AccountingLog = (
                     construct_accounting_log_for_debit(initiate_payment_request)
                 )
+                (
+                    credit_account_number,
+                    credit_account_name,
+                    credit_account_phone,
+                    credit_account_email,
+                ) = construct_credit_account_details(initiate_payment_request)
+
                 accounting_log_credit: AccountingLog = (
-                    construct_accounting_log_for_credit(initiate_payment_request)
+                    construct_accounting_log_for_credit(
+                        initiate_payment_request, credit_account_number
+                    )
                 )
 
                 remitting_account = update_account_for_debit(
@@ -102,10 +112,10 @@ def process_payments_worker(payment_request_batch_id: str):
                 )
 
                 credit_account = update_account_for_credit(
-                    initiate_payment_request.beneficiary_name,
-                    accounting_log_credit.account_number,
-                    initiate_payment_request.beneficiary_phone_no,
-                    initiate_payment_request.beneficiary_email,
+                    credit_account_name,
+                    credit_account_number,
+                    credit_account_phone,
+                    credit_account_email,
                     initiate_payment_request.beneficiary_account_currency,
                     initiate_payment_request.payment_amount,
                     session,
@@ -130,6 +140,11 @@ def process_payments_worker(payment_request_batch_id: str):
             initiate_payment_batch_request.payment_initiate_attempts += 1
             initiate_payment_batch_request.payment_status = PaymentStatus.SUCCESS
             _logger.info(f"Payments processed for batch: {payment_request_batch_id}")
+            account_statement = AccountStatement(
+                account_number=initiate_payment_requests[0].remitting_account,
+                active=True,
+            )
+            session.add(account_statement)
             session.commit()
         except Exception as e:
             _logger.error(f"Error processing payment: {e}")
@@ -163,14 +178,14 @@ def construct_accounting_log_for_debit(
 
 
 def construct_accounting_log_for_credit(
-    initiate_payment_request: InitiatePaymentRequest,
+    initiate_payment_request: InitiatePaymentRequest, credit_account_number: str
 ):
     return AccountingLog(
         reference_no=str(uuid.uuid4()),
         corresponding_block_reference_no="",
         customer_reference_no=initiate_payment_request.payment_reference_number,
         debit_credit=DebitCreditTypes.CREDIT,
-        account_number=construct_credit_account_number(initiate_payment_request),
+        account_number=credit_account_number,
         transaction_amount=initiate_payment_request.payment_amount,
         transaction_date=datetime.utcnow(),
         transaction_currency=initiate_payment_request.remitting_account_currency,
@@ -185,20 +200,36 @@ def construct_accounting_log_for_credit(
     )
 
 
-def construct_credit_account_number(initiate_payment_request: InitiatePaymentRequest):
+def construct_credit_account_details(initiate_payment_request: InitiatePaymentRequest):
     if initiate_payment_request.beneficiary_account_type == "MOBILE_WALLET":
         return (
-            f"CLEARING - {initiate_payment_request.beneficiary_mobile_wallet_provider}"
+            f"CLEARING - {initiate_payment_request.beneficiary_mobile_wallet_provider}",
+            f"Clearing account for {initiate_payment_request.beneficiary_mobile_wallet_provider}",
+            None,
+            None,
         )
     elif initiate_payment_request.beneficiary_account_type == "EMAIL_WALLET":
         return (
-            f"CLEARING - {initiate_payment_request.beneficiary_email_wallet_provider}"
+            f"CLEARING - {initiate_payment_request.beneficiary_email_wallet_provider}",
+            f"Clearing account for {initiate_payment_request.beneficiary_email_wallet_provider}",
+            None,
+            None,
         )
     elif initiate_payment_request.beneficiary_account_type == "BANK_ACCOUNT":
         if initiate_payment_request.beneficiary_bank_code == "EXAMPLE_BANK":
-            return initiate_payment_request.beneficiary_account
+            return (
+                initiate_payment_request.beneficiary_account,
+                initiate_payment_request.beneficiary_name,
+                initiate_payment_request.beneficiary_phone_no,
+                initiate_payment_request.beneficiary_email,
+            )
         else:
-            return f"CLEARING - {initiate_payment_request.beneficiary_bank_code}"
+            return (
+                f"CLEARING - {initiate_payment_request.beneficiary_bank_code}",
+                f"Clearing account for {initiate_payment_request.beneficiary_bank_code}",
+                None,
+                None,
+            )
 
 
 def generate_failures(failure_logs: List[AccountingLog], session):
