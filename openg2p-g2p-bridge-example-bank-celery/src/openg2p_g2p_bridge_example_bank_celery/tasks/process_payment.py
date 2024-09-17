@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 import uuid
 from datetime import datetime
 from typing import List
@@ -12,6 +13,7 @@ from openg2p_g2p_bridge_example_bank_models.models import (
     InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
     PaymentStatus,
+    AccountStatement,
 )
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
@@ -139,6 +141,11 @@ def process_payments_worker(payment_request_batch_id: str):
             initiate_payment_batch_request.payment_initiate_attempts += 1
             initiate_payment_batch_request.payment_status = PaymentStatus.SUCCESS
             _logger.info(f"Payments processed for batch: {payment_request_batch_id}")
+            account_statement = AccountStatement(
+                account_number=initiate_payment_requests[0].remitting_account,
+                active=True,
+            )
+            session.add(account_statement)
             session.commit()
         except Exception as e:
             _logger.error(f"Error processing payment: {e}")
