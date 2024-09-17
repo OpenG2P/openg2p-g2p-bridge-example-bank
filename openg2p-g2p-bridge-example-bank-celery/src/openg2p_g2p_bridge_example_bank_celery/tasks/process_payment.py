@@ -1,6 +1,5 @@
 import logging
 import random
-import time
 import uuid
 from datetime import datetime
 from typing import List
@@ -8,12 +7,12 @@ from typing import List
 from openg2p_g2p_bridge_example_bank_models.models import (
     Account,
     AccountingLog,
+    AccountStatement,
     DebitCreditTypes,
     FundBlock,
     InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
     PaymentStatus,
-    AccountStatement,
 )
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
