@@ -40,9 +40,9 @@ class USSDController(BaseController):
         response: str = ""
         _logger.info(f"Your input is {text}")
         if text == "":
-            response = "CON Welcome to Example Bank. What do you want to do? \n"
+            response = "CON Welcome to Example Bank. What do you want to do? \n \n"
             response += "1. Get account balance \n"
-            response += "2. Initiate transfer"
+            response += "2. Initiate transfer \n"
             response += "3. Request account statement"
         elif text == "1":
             response = await self.get_account_balance(phoneNumber)
