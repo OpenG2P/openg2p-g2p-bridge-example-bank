@@ -40,9 +40,10 @@ class USSDController(BaseController):
         response: str = ""
         _logger.info(f"Your input is {text}")
         if text == "":
-            response = "CON What do you want to do \n"
+            response = "CON Welcome to Example Bank. What do you want to do? \n"
             response += "1. Get account balance \n"
             response += "2. Initiate transfer"
+            response += "3. Request account statement"
         elif text == "1":
             response = await self.get_account_balance(phoneNumber)
         elif text == "2":
@@ -70,4 +71,7 @@ class USSDController(BaseController):
                 _logger.error("Account not found")
                 return f"END Account not found for this phone number: {phone_number}"
 
-            return f"END Available balance is {account.available_balance}"
+            return (
+                f"END Available balance in account ending with {account.account_number[-4:]} is"
+                f" ₹{account.available_balance:,.2f}"
+            )
