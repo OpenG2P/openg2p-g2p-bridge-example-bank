@@ -5,7 +5,11 @@ from fastapi import Form
 from fastapi.responses import PlainTextResponse
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
-from openg2p_g2p_bridge_example_bank_models.models import Account, AccountingLog
+from openg2p_g2p_bridge_example_bank_models.models import (
+    Account,
+    AccountingLog,
+    DebitCreditTypes,
+)
 from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
@@ -111,7 +115,9 @@ class USSDController(BaseController):
                     "%d/%b"
                 ).upper()  # Format and convert to uppercase
                 credit_debit_type = (
-                    "CR" if accounting_log.debit_credit == "CREDIT" else "DR"
+                    "CR"
+                    if accounting_log.debit_credit == DebitCreditTypes.CREDIT
+                    else "DR"
                 )
-                transaction_text += f"{credit_debit_type} - ₹{accounting_log.transaction_amount:,.2f} - {date_formatted} - {accounting_log.narrative_1} \n"
+                transaction_text += f"{credit_debit_type} - ₹{accounting_log.transaction_amount:,.2f} - {date_formatted} - {accounting_log.narrative_2} \n"
             return f"END {transaction_text}"
