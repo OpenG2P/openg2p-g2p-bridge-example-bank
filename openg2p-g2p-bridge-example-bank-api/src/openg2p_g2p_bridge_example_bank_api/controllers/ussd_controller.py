@@ -80,7 +80,7 @@ class USSDController(BaseController):
 
             return (
                 f"END Available balance in account ending with {account.account_number[-4:]} is"
-                f" ₹{account.available_balance:,.2f}"
+                f" ${account.available_balance:,.2f}"
             )
 
     async def get_recent_transactions(self, phone_number: str) -> str:
@@ -119,5 +119,5 @@ class USSDController(BaseController):
                     if accounting_log.debit_credit == DebitCreditTypes.CREDIT
                     else "DR"
                 )
-                transaction_text += f"{credit_debit_type} - ₹{accounting_log.transaction_amount:,.2f} - {date_formatted} - {accounting_log.narrative_2} \n"
+                transaction_text += f"{credit_debit_type} - ${accounting_log.transaction_amount:,.2f} - {date_formatted} - {accounting_log.narrative_2} \n"
             return f"END {transaction_text}"
