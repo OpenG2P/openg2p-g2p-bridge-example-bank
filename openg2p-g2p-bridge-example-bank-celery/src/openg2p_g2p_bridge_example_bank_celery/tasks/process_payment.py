@@ -146,6 +146,11 @@ def process_payments_worker(payment_request_batch_id: str):
             )
             session.add(account_statement)
             session.commit()
+            _logger.info("Account statement generation task created")
+            celery_app.send_task(
+                "account_statement_generator",
+                args=(account_statement.id,),
+            )
         except Exception as e:
             _logger.error(f"Error processing payment: {e}")
             session.rollback()
