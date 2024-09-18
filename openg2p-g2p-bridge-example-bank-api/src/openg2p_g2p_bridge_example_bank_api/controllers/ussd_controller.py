@@ -114,4 +114,4 @@ class USSDController(BaseController):
                     "CR" if accounting_log.debit_credit == "CREDIT" else "DR"
                 )
                 transaction_text += f"{credit_debit_type} - ₹{accounting_log.transaction_amount:,.2f} - {date_formatted} - {accounting_log.narrative_1} \n"
-            return transaction_text
+            return f"END {transaction_text}"
