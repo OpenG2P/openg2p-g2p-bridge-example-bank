@@ -229,11 +229,13 @@ def construct_credit_account_details(initiate_payment_request: InitiatePaymentRe
                 initiate_payment_request.beneficiary_email,
             )
         else:
+            random_id = str(uuid.uuid4())
+            random_phone = f"254{random.randint(700000000, 799999999)}"
             return (
                 f"CLEARING - {initiate_payment_request.beneficiary_bank_code}",
                 f"Clearing account for {initiate_payment_request.beneficiary_bank_code}",
-                None,
-                None,
+                random_phone,
+                f"{random_id}@email.com",
             )
 
 
