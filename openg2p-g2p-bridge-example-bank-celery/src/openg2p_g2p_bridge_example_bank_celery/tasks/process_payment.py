@@ -232,8 +232,8 @@ def construct_credit_account_details(initiate_payment_request: InitiatePaymentRe
             return (
                 f"CLEARING - {initiate_payment_request.beneficiary_bank_code}",
                 f"Clearing account for {initiate_payment_request.beneficiary_bank_code}",
-                None,
-                None,
+                "0000000000",
+                "blank@email.com",
             )
 
 
