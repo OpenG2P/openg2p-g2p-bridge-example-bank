@@ -247,6 +247,7 @@ def generate_failures(failure_logs: List[AccountingLog], session):
         "ACCOUNT_DORMANT",
         "ACCOUNT_DECEASED",
     ]
+    failure_reason = random.choice(failure_reasons)
     for failure_log in failure_logs:
         account_log: AccountingLog = AccountingLog(
             reference_no=str(uuid.uuid4()),
@@ -262,7 +263,7 @@ def generate_failures(failure_logs: List[AccountingLog], session):
             narrative_3=failure_log.narrative_3,
             narrative_4=failure_log.narrative_4,
             narrative_5=failure_log.narrative_5,
-            narrative_6=random.choice(failure_reasons),
+            narrative_6=failure_reason,
             active=True,
         )
         if failure_log.debit_credit == DebitCreditTypes.DEBIT:
