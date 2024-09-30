@@ -1,10 +1,16 @@
-name: Bridge API PyPI Publish
+name: Bank Models PyPI Publish
 
 on:
-  workflow_dispatch
+  push:
+    tags:
+      - "*"
+    branches-ignore:
+      - '*'
+  workflow_dispatch:
 
 jobs:
   publish-to-pypi:
+    name: Publish to PyPI For Models Tag
     runs-on: ubuntu-latest
     steps:
     - name: Set up Python
@@ -15,8 +21,9 @@ jobs:
     - name: Install build dependencies
       run: pip install build
     - name: Build distribution
-      run: python -m build -s openg2p-g2p-bridge-example-bank-api/
+      run: python -m build ./openg2p-g2p-bridge-example-bank-models
     - name: Publish
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: ./openg2p-g2p-bridge-example-bank-models/dist/

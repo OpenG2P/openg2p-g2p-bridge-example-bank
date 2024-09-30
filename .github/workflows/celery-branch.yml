@@ -1,16 +1,19 @@
-name: Bridge Example Bank API Docker Publish
+name: Example Bank Celery Branch Workflow
 
 on:
   push:
-  workflow_dispatch:
+    branches-ignore:
+      - develop
+    tags-ignore:
+      - '*'
 
 jobs:
-  docker-build:
-    name: Docker Build and Push
+  docker-build-for-branch:
+    name: Docker Build and Push For Celery Branch
     runs-on: ubuntu-latest
     env:
       NAMESPACE: ${{ secrets.docker_hub_organisation || 'openg2p' }}
-      SERVICE_NAME: openg2p-g2p-bridge-example-bank-api
+      SERVICE_NAME: openg2p-g2p-bridge-example-bank-celery
     steps:
       - uses: actions/checkout@v3
       - name: Docker build
@@ -22,15 +25,12 @@ jobs:
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           VERSION=$BRANCH_NAME
-          if [[ $BRANCH_NAME == master || $BRANCH_NAME == main ]]; then
-            VERSION=develop
-          fi
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
           echo VERSION=$VERSION >> $GITHUB_ENV
 
-          docker build ./openg2p-g2p-bridge-example-bank-api \
+          docker build ./openg2p-g2p-bridge-example-bank-celery -f ./openg2p-g2p-bridge-example-bank-celery/Dockerfile-git \
             --tag $IMAGE_ID:$VERSION
           if [[ '${{ secrets.docker_hub_token }}' != '' && '${{ secrets.docker_hub_actor }}' != '' ]]; then
             export DOCKER_PUSH="true"
