@@ -119,7 +119,6 @@ def account_statement_generator(account_statement_id: int):
             # Update the log to indicate that it has been reported in the MT940 statement
             account_log.reported_in_mt940 = True
 
-
         statement = mt940_writer.create_statement(
             account_statement_id,
             mt940_account,
