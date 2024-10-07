@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from openg2p_fastapi_common.models import BaseORMModelWithTimes
-from sqlalchemy import DateTime, Float, String, Text
+from sqlalchemy import DateTime, Float, String, Text, Boolean
 from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -43,3 +43,4 @@ class AccountingLog(BaseORMModelWithTimes):
     narrative_6: Mapped[str] = mapped_column(
         String, nullable=True
     )  # beneficiary phone number
+    reported_in_mt940: Mapped[bool] = mapped_column(Boolean, default=False)
