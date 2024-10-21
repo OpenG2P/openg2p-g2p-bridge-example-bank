@@ -119,5 +119,9 @@ class USSDController(BaseController):
                     if accounting_log.debit_credit == DebitCreditTypes.CREDIT
                     else "DR"
                 )
-                transaction_text += f"{credit_debit_type} - ${accounting_log.transaction_amount:,.2f} - {date_formatted} - {accounting_log.narrative_2} \n"
+                transaction_text += (
+                    f"{credit_debit_type} - ${accounting_log.transaction_amount:,.2f} "
+                    f"- {date_formatted} - {accounting_log.narrative_3} "
+                    f"- {accounting_log.narrative_4} \n"
+                )
             return f"END {transaction_text}"
