@@ -21,10 +21,10 @@ ADD --chown=${container_user}:${container_user_group} main.py /app
 RUN python3 -m venv venv \
   && . ./venv/bin/activate
 RUN python3 -m pip install  \
-    openg2p-fastapi-common==develop \
-    openg2p-fastapi-auth==develop \
-    openg2p-g2p-bridge-example-bank-models==develop \
-    openg2p-g2p-bridge-example-bank-celery==develop
+    openg2p-fastapi-common==1.1.1 \
+    openg2p-fastapi-auth==1.1.1 \
+    openg2p-g2p-bridge-example-bank-models==1.0.0 \
+    openg2p-g2p-bridge-example-bank-celery==1.0.0
 
 USER ${container_user}
 
