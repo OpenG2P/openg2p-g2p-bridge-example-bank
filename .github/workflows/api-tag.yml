@@ -45,7 +45,7 @@ jobs:
         run: |
           python -m pip install git+https://github.com/openg2p/openg2p-fastapi-common@v1.1.1\#subdirectory=openg2p-fastapi-common
           python -m pip install git+https://github.com/openg2p/openg2p-fastapi-common@v1.1.1\#subdirectory=openg2p-fastapi-auth
-          python -m pip install git+https://github.com/openg2p/openg2p-g2p-bridge-example-bank@1.0.0\#subdirectory=openg2p-g2p-bridge-example-bank-models
+          python -m pip install git+https://github.com/openg2p/openg2p-g2p-bridge-example-bank@v1.0.0\#subdirectory=openg2p-g2p-bridge-example-bank-models
           python -m pip install openg2p-g2p-bridge-example-bank-api==1.0.0
       - name: Generate openapi json
         run: |
