@@ -77,7 +77,7 @@ jobs:
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          VERSION=TAG_NAME
+          VERSION=$TAG_NAME
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
           echo IMAGE_ID=$IMAGE_ID >> $GITHUB_ENV
