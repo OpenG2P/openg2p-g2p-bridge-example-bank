@@ -7,6 +7,7 @@ from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
 from openg2p_g2p_bridge_example_bank_models.models import (
     InitiatePaymentBatchRequest,
+    PaymentStatus,
 )
 from openg2p_g2p_bridge_example_bank_models.schemas import (
     InitiatePaymentPayload,
@@ -41,7 +42,7 @@ class PaymentController(BaseController):
         async with session_maker() as session:
             batch_id = str(uuid.uuid4())
             initiate_payment_batch_request = InitiatePaymentBatchRequest(
-                request_status="PENDING",
+                batching_request_status=PaymentStatus.PENDING,
                 initiate_payment_payloads=json.dumps(
                     [payload.model_dump() for payload in initiate_payment_payloads]
                 ),
