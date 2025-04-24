@@ -35,7 +35,7 @@ class InitiatePaymentBatchRequest(BaseORMModelWithTimes):
         SqlEnum(PaymentStatus), default=PaymentStatus.PENDING
     )
     batching_request_latest_error_code: Mapped[str] = mapped_column(
-        String, default=None
+        String, nullable=True, default=None
     )
 
 
