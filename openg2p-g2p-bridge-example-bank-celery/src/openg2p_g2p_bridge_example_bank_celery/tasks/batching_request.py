@@ -122,7 +122,7 @@ def batching_request_worker(payment_request_batch_id: str):
                 initiate_payment_requests.append(initiate_payment_request)
 
             initiate_payment_batch_request.batching_request_status = (
-                PaymentStatus.COMPLETED
+                PaymentStatus.SUCCESS
             )
             initiate_payment_batch_request.batching_request_latest_error_code = None
             initiate_payment_batch_request.payment_status = PaymentStatus.PENDING
