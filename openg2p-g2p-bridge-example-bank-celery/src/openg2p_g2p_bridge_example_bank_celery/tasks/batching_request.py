@@ -1,15 +1,7 @@
 import json
 import logging
-import random
-import uuid
-from datetime import datetime
-from typing import List
 
 from openg2p_g2p_bridge_example_bank_models.models import (
-    Account,
-    AccountingLog,
-    AccountStatement,
-    DebitCreditTypes,
     FundBlock,
     InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
@@ -35,7 +27,7 @@ def batching_request_beat_producer():
         initiate_payment_batch_requests = (
             session.execute(
                 select(InitiatePaymentBatchRequest).where(
-                    (InitiatePaymentBatchRequest.batching_request_status.in_(["PENDING"]))
+                    InitiatePaymentBatchRequest.batching_request_status.in_(["PENDING"])
                 )
             )
             .scalars()
@@ -51,7 +43,9 @@ def batching_request_beat_producer():
                 args=[initiate_payment_batch_request.batch_id],
                 queue="g2p_bridge_celery_worker_tasks",
             )
-            initiate_payment_batch_request.batching_request_status = PaymentStatus.PROCESSING
+            initiate_payment_batch_request.batching_request_status = (
+                PaymentStatus.PROCESSING
+            )
             session.add(initiate_payment_batch_request)
         session.commit()
 
@@ -72,12 +66,18 @@ def batching_request_worker(payment_request_batch_id: str):
         )
         try:
             initiate_payment_requests = []
-            initiate_payment_payloads = [InitiatePaymentPayload(**payload) for payload in json.loads(initiate_payment_batch_request.initiate_payment_payloads)]
+            initiate_payment_payloads = [
+                InitiatePaymentPayload(**payload)
+                for payload in json.loads(
+                    initiate_payment_batch_request.initiate_payment_payloads
+                )
+            ]
             for initiate_payment_payload in initiate_payment_payloads:
                 fund_block = (
                     session.execute(
                         select(FundBlock).where(
-                            FundBlock.block_reference_no == initiate_payment_payload.funds_blocked_reference_number
+                            FundBlock.block_reference_no
+                            == initiate_payment_payload.funds_blocked_reference_number
                         )
                     )
                     .scalars()
@@ -121,20 +121,26 @@ def batching_request_worker(payment_request_batch_id: str):
                 )
                 initiate_payment_requests.append(initiate_payment_request)
 
-            initiate_payment_batch_request.batching_request_status = PaymentStatus.COMPLETED
+            initiate_payment_batch_request.batching_request_status = (
+                PaymentStatus.COMPLETED
+            )
             initiate_payment_batch_request.batching_request_latest_error_code = None
             initiate_payment_batch_request.payment_status = PaymentStatus.PENDING
 
             session.add_all(initiate_payment_requests)
             session.commit()
-            _logger.info(f"Initiate payment requests created successfully for batch: {payment_request_batch_id}")
+            _logger.info(
+                f"Initiate payment requests created successfully for batch: {payment_request_batch_id}"
+            )
 
         except Exception as e:
             _logger.error(
                 f"Error creating payment requests for initiate_payment_batch_request {payment_request_batch_id}: {e}"
             )
             session.rollback()
-            initiate_payment_batch_request.batching_request_status = PaymentStatus.FAILED
+            initiate_payment_batch_request.batching_request_status = (
+                PaymentStatus.FAILED
+            )
             initiate_payment_batch_request.batching_request_latest_error_code = str(e)
             session.commit()
             raise e

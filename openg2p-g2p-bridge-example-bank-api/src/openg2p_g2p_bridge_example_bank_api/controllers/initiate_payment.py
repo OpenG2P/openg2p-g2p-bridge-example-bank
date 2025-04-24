@@ -6,16 +6,13 @@ from typing import List
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.controller import BaseController
 from openg2p_g2p_bridge_example_bank_models.models import (
-    FundBlock,
     InitiatePaymentBatchRequest,
-    InitiatePaymentRequest,
 )
 from openg2p_g2p_bridge_example_bank_models.schemas import (
     InitiatePaymentPayload,
     InitiatePaymentResponse,
 )
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from sqlalchemy.future import select
 
 from ..config import Settings
 
@@ -45,11 +42,15 @@ class PaymentController(BaseController):
             batch_id = str(uuid.uuid4())
             initiate_payment_batch_request = InitiatePaymentBatchRequest(
                 request_status="PENDING",
-                initiate_payment_payloads=json.dumps([payload.model_dump() for payload in initiate_payment_payloads]),
+                initiate_payment_payloads=json.dumps(
+                    [payload.model_dump() for payload in initiate_payment_payloads]
+                ),
                 batch_id=batch_id,
                 active=True,
             )
-            _logger.info(f"INITIATE_PAYMENT_BATCH_REQUEST: {initiate_payment_batch_request}")
+            _logger.info(
+                f"INITIATE_PAYMENT_BATCH_REQUEST: {initiate_payment_batch_request}"
+            )
             session.add(initiate_payment_batch_request)
             # initiate_payment_requests = []
             # for initiate_payment_payload in initiate_payment_payloads:
