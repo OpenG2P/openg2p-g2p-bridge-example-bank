@@ -1,13 +1,15 @@
 from enum import Enum
 
 from openg2p_fastapi_common.models import BaseORMModelWithTimes
+from sqlalchemy import JSON, Float, Integer, String
 from sqlalchemy import Enum as SqlEnum
-from sqlalchemy import Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 
 class PaymentStatus(Enum):
+    NOT_APPLICABLE = "NOT_APPLICABLE"
     PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
 
@@ -25,10 +27,14 @@ class InitiatePaymentBatchRequest(BaseORMModelWithTimes):
     __tablename__ = "initiate_payment_batch_requests"
     batch_id: Mapped[str] = mapped_column(String, index=True, unique=True)
     payment_initiate_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    initiate_payment_payloads: Mapped[JSON] = mapped_column(JSON)
     payment_status: Mapped[PaymentStatus] = mapped_column(
+        SqlEnum(PaymentStatus), default=PaymentStatus.NOT_APPLICABLE
+    )
+    batching_request_status: Mapped[PaymentStatus] = mapped_column(
         SqlEnum(PaymentStatus), default=PaymentStatus.PENDING
     )
-
+    batching_request_latest_error_code: Mapped[str] = mapped_column(String, default=None)
 
 class InitiatePaymentRequest(BaseORMModelWithTimes):
     __tablename__ = "initiate_payment_requests"
