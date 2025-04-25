@@ -53,7 +53,8 @@ def process_payments_beat_producer():
                 args=[initiate_payment_batch_request.batch_id],
                 queue="g2p_bridge_celery_worker_tasks",
             )
-        _logger.info("Payments processing initiated")
+            initiate_payment_batch_request.payment_status = PaymentStatus.PROCESSING
+            session.add(initiate_payment_batch_request)
         session.commit()
 
 
