@@ -1,6 +1,7 @@
 import logging
 import random
 import uuid
+from fastnanoid import generate
 from datetime import datetime
 from typing import List
 
@@ -169,7 +170,7 @@ def construct_accounting_log_for_debit(
     initiate_payment_request: InitiatePaymentRequest,
 ):
     return AccountingLog(
-        reference_no=str(uuid.uuid4()),
+        reference_no=generate(size=23),
         corresponding_block_reference_no=initiate_payment_request.funds_blocked_reference_number,
         customer_reference_no=initiate_payment_request.payment_reference_number,
         debit_credit=DebitCreditTypes.DEBIT,
@@ -192,7 +193,7 @@ def construct_accounting_log_for_credit(
     initiate_payment_request: InitiatePaymentRequest, credit_account_number: str
 ):
     return AccountingLog(
-        reference_no=str(uuid.uuid4()),
+        reference_no=generate(size=23),
         corresponding_block_reference_no="",
         customer_reference_no=initiate_payment_request.payment_reference_number,
         debit_credit=DebitCreditTypes.CREDIT,
@@ -256,7 +257,7 @@ def generate_failures(failure_logs: List[AccountingLog], session):
     for failure_log in failure_logs:
         failure_reason = random.choice(failure_reasons)
         account_log: AccountingLog = AccountingLog(
-            reference_no=str(uuid.uuid4()),
+            reference_no=generate(size=23),
             customer_reference_no=failure_log.customer_reference_no,
             debit_credit=failure_log.debit_credit,
             account_number=failure_log.account_number,
