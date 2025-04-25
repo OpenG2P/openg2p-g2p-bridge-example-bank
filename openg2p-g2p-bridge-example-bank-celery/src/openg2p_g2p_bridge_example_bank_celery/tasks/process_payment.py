@@ -1,10 +1,10 @@
 import logging
 import random
 import uuid
-from fastnanoid import generate
 from datetime import datetime
 from typing import List
 
+from fastnanoid import generate
 from openg2p_g2p_bridge_example_bank_models.models import (
     Account,
     AccountingLog,
