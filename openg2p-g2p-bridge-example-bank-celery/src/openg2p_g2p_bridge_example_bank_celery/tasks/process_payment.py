@@ -62,6 +62,7 @@ def process_payments_worker(payment_request_batch_id: str):
     _logger.info(f"Processing payments for batch: {payment_request_batch_id}")
     session_maker = sessionmaker(bind=_engine, expire_on_commit=False)
     with session_maker() as session:
+        _logger.info(f"Processing payments for batch: {payment_request_batch_id}")
         initiate_payment_batch_request = (
             session.execute(
                 select(InitiatePaymentBatchRequest).where(
@@ -70,6 +71,9 @@ def process_payments_worker(payment_request_batch_id: str):
             )
             .scalars()
             .first()
+        )
+        _logger.info(
+            f"Initiate payment batch request: {initiate_payment_batch_request}"
         )
         try:
             initiate_payment_requests = (
@@ -146,6 +150,7 @@ def process_payments_worker(payment_request_batch_id: str):
             )
             session.add(account_statement)
             session.commit()
+            # TODO: create beat for account statement generation
             _logger.info("Account statement generation task created")
             celery_app.send_task(
                 "account_statement_generator",
@@ -247,8 +252,8 @@ def generate_failures(failure_logs: List[AccountingLog], session):
         "ACCOUNT_DORMANT",
         "ACCOUNT_DECEASED",
     ]
-    failure_reason = random.choice(failure_reasons)
     for failure_log in failure_logs:
+        failure_reason = random.choice(failure_reasons)
         account_log: AccountingLog = AccountingLog(
             reference_no=str(uuid.uuid4()),
             customer_reference_no=failure_log.customer_reference_no,
