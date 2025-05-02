@@ -108,7 +108,7 @@ def account_statement_generator(account_statement_id: int):
                     Decimal(abs(account_log.transaction_amount)),
                     TransactionType.transfer,
                     account_log.customer_reference_no,
-                    account_log.reference_no[:16],
+                    account_log.reference_no,
                     "",
                     "",
                     f"{account_log.narrative_1}\n{account_log.narrative_2}"

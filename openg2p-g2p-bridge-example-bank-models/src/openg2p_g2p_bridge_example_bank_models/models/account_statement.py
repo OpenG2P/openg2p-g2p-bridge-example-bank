@@ -19,6 +19,7 @@ class AccountStatement(BaseORMModelWithTimes):
     account_statement_date: Mapped[datetime.date] = mapped_column(
         DateTime, default=datetime.date(datetime.utcnow())
     )
+    # TODO: add status enum
 
 
 class AccountingLog(BaseORMModelWithTimes):

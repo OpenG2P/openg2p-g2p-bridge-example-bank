@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from typing import List
 
+from fastnanoid import generate
 from openg2p_g2p_bridge_example_bank_models.models import (
     Account,
     AccountingLog,
@@ -53,7 +54,8 @@ def process_payments_beat_producer():
                 args=[initiate_payment_batch_request.batch_id],
                 queue="g2p_bridge_celery_worker_tasks",
             )
-        _logger.info("Payments processing initiated")
+            initiate_payment_batch_request.payment_status = PaymentStatus.PROCESSING
+            session.add(initiate_payment_batch_request)
         session.commit()
 
 
@@ -62,6 +64,7 @@ def process_payments_worker(payment_request_batch_id: str):
     _logger.info(f"Processing payments for batch: {payment_request_batch_id}")
     session_maker = sessionmaker(bind=_engine, expire_on_commit=False)
     with session_maker() as session:
+        _logger.info(f"Processing payments for batch: {payment_request_batch_id}")
         initiate_payment_batch_request = (
             session.execute(
                 select(InitiatePaymentBatchRequest).where(
@@ -70,6 +73,9 @@ def process_payments_worker(payment_request_batch_id: str):
             )
             .scalars()
             .first()
+        )
+        _logger.info(
+            f"Initiate payment batch request: {initiate_payment_batch_request}"
         )
         try:
             initiate_payment_requests = (
@@ -146,6 +152,7 @@ def process_payments_worker(payment_request_batch_id: str):
             )
             session.add(account_statement)
             session.commit()
+            # TODO: create beat for account statement generation
             _logger.info("Account statement generation task created")
             celery_app.send_task(
                 "account_statement_generator",
@@ -163,7 +170,7 @@ def construct_accounting_log_for_debit(
     initiate_payment_request: InitiatePaymentRequest,
 ):
     return AccountingLog(
-        reference_no=str(uuid.uuid4()),
+        reference_no=generate(size=23),
         corresponding_block_reference_no=initiate_payment_request.funds_blocked_reference_number,
         customer_reference_no=initiate_payment_request.payment_reference_number,
         debit_credit=DebitCreditTypes.DEBIT,
@@ -186,7 +193,7 @@ def construct_accounting_log_for_credit(
     initiate_payment_request: InitiatePaymentRequest, credit_account_number: str
 ):
     return AccountingLog(
-        reference_no=str(uuid.uuid4()),
+        reference_no=generate(size=23),
         corresponding_block_reference_no="",
         customer_reference_no=initiate_payment_request.payment_reference_number,
         debit_credit=DebitCreditTypes.CREDIT,
@@ -247,10 +254,10 @@ def generate_failures(failure_logs: List[AccountingLog], session):
         "ACCOUNT_DORMANT",
         "ACCOUNT_DECEASED",
     ]
-    failure_reason = random.choice(failure_reasons)
     for failure_log in failure_logs:
+        failure_reason = random.choice(failure_reasons)
         account_log: AccountingLog = AccountingLog(
-            reference_no=str(uuid.uuid4()),
+            reference_no=generate(size=23),
             customer_reference_no=failure_log.customer_reference_no,
             debit_credit=failure_log.debit_credit,
             account_number=failure_log.account_number,
