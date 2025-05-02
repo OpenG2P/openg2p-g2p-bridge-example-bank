@@ -1,11 +1,6 @@
 name:  Example Bank API Tag Workflow
 
 on:
-  push:
-    tags:
-      - "*"
-    branches-ignore:
-      - '*'
   workflow_dispatch:
 
 jobs:
