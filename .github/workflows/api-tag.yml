@@ -22,34 +22,3 @@ jobs:
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: ./openg2p-g2p-bridge-example-bank-api/dist/
-
-  openapi-publish:
-    name: OpenAPI Generate and Publish For API Tag
-    needs: publish-to-pypi
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Get branch name (merge)
-        run: |
-          echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-      - name: Setup python for openapi generate
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      - name: Install app
-        run: |
-          python -m pip install git+https://github.com/openg2p/openg2p-fastapi-common@v1.1.1\#subdirectory=openg2p-fastapi-common
-          python -m pip install git+https://github.com/openg2p/openg2p-fastapi-common@v1.1.1\#subdirectory=openg2p-fastapi-auth
-          python -m pip install git+https://github.com/openg2p/openg2p-g2p-bridge-example-bank@v1.0.2\#subdirectory=openg2p-g2p-bridge-example-bank-models
-          python -m pip install openg2p-g2p-bridge-example-bank-api==1.0.2
-      - name: Generate openapi json
-        run: |
-          mkdir -p openg2p-g2p-bridge-example-bank-api/api-docs/generated
-          python3 openg2p-g2p-bridge-example-bank-api/main.py getOpenAPI openg2p-g2p-bridge-example-bank-api/api-docs/generated/openapi.json
-      - name: Setup nodejs
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - name: Publish to stoplight
-        run: |
-          npx @stoplight/cli@5 push --ci-token ${{ secrets.STOPLIGHT_PROJECT_TOKEN }} --url https://openg2p.stoplight.io --branch ${{ env.TAG_NAME }} --directory openg2p-g2p-bridge-example-bank-api/api-docs/generated
