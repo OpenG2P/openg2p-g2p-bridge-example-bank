@@ -11,12 +11,14 @@ class DebitCreditTypes(Enum):
     DEBIT = "debit"
     CREDIT = "credit"
 
+
 class AccountStatementStatus(Enum):
     NOT_APPLICABLE = "NOT_APPLICABLE"
     PENDING = "PENDING"
     PROCESSING = "PROCESSING"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
+
 
 class AccountStatement(BaseORMModelWithTimes):
     __tablename__ = "account_statements"
@@ -28,6 +30,7 @@ class AccountStatement(BaseORMModelWithTimes):
     account_statement_date: Mapped[datetime.date] = mapped_column(
         DateTime, default=datetime.date(datetime.utcnow())
     )
+
 
 class AccountingLog(BaseORMModelWithTimes):
     __tablename__ = "accounting_logs"

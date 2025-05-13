@@ -23,7 +23,11 @@ def account_statement_generator_beat_producer():
         account_statements = (
             session.execute(
                 select(AccountStatement).where(
-                    (AccountStatement.account_statement_generation_status.in_(["PENDING"]))
+                    (
+                        AccountStatement.account_statement_generation_status.in_(
+                            ["PENDING"]
+                        )
+                    )
                     & (AccountStatement.active.is_(True))
                 )
             )
@@ -42,7 +46,11 @@ def account_statement_generator_beat_producer():
                 args=[account_statement.id],
                 queue="example_bank_queue",
             )
-            account_statement.account_statement_generation_status = AccountStatementStatus.PROCESSING
+            account_statement.account_statement_generation_status = (
+                AccountStatementStatus.PROCESSING
+            )
             session.commit()
 
-        _logger.info(f"Account statement generated for {len(account_statements)} accounts")
+        _logger.info(
+            f"Account statement generated for {len(account_statements)} accounts"
+        )
