@@ -15,7 +15,7 @@ from sqlalchemy.orm import sessionmaker
 
 from ..app import celery_app, get_engine
 from ..config import Settings
-from ..utils import Mt940Writer, TransactionType
+from ..utils import Mt940Writer, TransactionType, create_jwt_token
 
 _config = Settings.get_config()
 _engine = get_engine()
@@ -143,8 +143,25 @@ def account_statement_generator_worker(account_statement_id: int):
         files = {
             "statement_file": ("statement.mt940", mt940_file.getvalue(), "text/plain")
         }
+        files_json = {
+            "statement_file": {
+                "filename": "statement.mt940",
+                "content": mt940_file.getvalue(),
+                "content_type": "text/plain",
+            }
+        }
+        jwt_token = create_jwt_token(files_json, _config.private_key)
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Signature": jwt_token,
+        }
         try:
-            response = requests.post(_config.mt940_statement_callback_url, files=files)
+            response = requests.post(
+                _config.mt940_statement_callback_url,
+                json=files_json,
+                headers=headers,
+            )
             response.raise_for_status()
             _logger.info("MT940 statement uploaded successfully")
         except requests.exceptions.RequestException as e:
