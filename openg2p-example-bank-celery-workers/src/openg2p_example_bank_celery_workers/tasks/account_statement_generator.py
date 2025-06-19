@@ -140,9 +140,7 @@ def account_statement_generator_worker(account_statement_id: int):
         mt940_file = io.StringIO(str(mt940_statement))
 
         # Prepare the files dictionary for the request
-        {
-            "statement_file": ("statement.mt940", mt940_file.getvalue(), "text/plain")
-        }
+        {"statement_file": ("statement.mt940", mt940_file.getvalue(), "text/plain")}
         files_json = {
             "statement_file": {
                 "filename": "statement.mt940",
