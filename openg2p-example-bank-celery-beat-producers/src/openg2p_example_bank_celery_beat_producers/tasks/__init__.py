@@ -1,3 +1,3 @@
-from .account_statement_generator import account_statement_generator_beat_producer
-from .batching_request import batching_request_beat_producer
-from .process_payments import process_payments_beat_producer
+from .account_statement_generator_beat_producer import account_statement_generator_beat_producer
+from .batching_request_beat_producer import batching_request_beat_producer
+from .process_payments_beat_producer import process_payments_beat_producer
