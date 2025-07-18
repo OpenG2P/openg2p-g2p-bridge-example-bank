@@ -164,6 +164,7 @@ def process_payments_worker(payment_request_batch_id: str):
             initiate_payment_batch_request.payment_status = PaymentStatus.PENDING
             initiate_payment_batch_request.payment_initiate_attempts += 1
             session.commit()
+            raise e
 
 
 def construct_accounting_log_for_debit(
