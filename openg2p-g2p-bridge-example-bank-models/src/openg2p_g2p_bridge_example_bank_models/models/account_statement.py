@@ -12,14 +12,24 @@ class DebitCreditTypes(Enum):
     CREDIT = "credit"
 
 
+class AccountStatementStatus(Enum):
+    NOT_APPLICABLE = "NOT_APPLICABLE"
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+
+
 class AccountStatement(BaseORMModelWithTimes):
     __tablename__ = "account_statements"
     account_number: Mapped[str] = mapped_column(String, index=True)
     account_statement_lob: Mapped[str] = mapped_column(Text, nullable=True)
+    account_statement_generation_status: Mapped[AccountStatementStatus] = mapped_column(
+        SqlEnum(AccountStatementStatus), default=AccountStatementStatus.PENDING
+    )
     account_statement_date: Mapped[datetime.date] = mapped_column(
         DateTime, default=datetime.date(datetime.utcnow())
     )
-    # TODO: add status enum
 
 
 class AccountingLog(BaseORMModelWithTimes):

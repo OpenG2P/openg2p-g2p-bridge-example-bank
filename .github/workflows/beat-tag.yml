@@ -1,0 +1,24 @@
+name: Example Bank Celery Beat Producers Tag Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-to-pypi:
+    name: Publish to PyPI For Celery Tag
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - uses: actions/checkout@v3
+    - name: Install build dependencies
+      run: pip install build
+    - name: Build distribution
+      run: python -m build ./openg2p-example-bank-celery-beat-producers
+    - name: Publish
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: ./openg2p-example-bank-celery-beat-producers/dist/
