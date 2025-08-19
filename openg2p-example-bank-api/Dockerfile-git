@@ -21,13 +21,11 @@ ADD --chown=${container_user}:${container_user_group} main.py /app
 RUN python3 -m venv venv \
   && . ./venv/bin/activate
 RUN python3 -m pip install  \
-    openg2p-fastapi-common==1.1.2 \
-    openg2p-fastapi-auth==1.1.2 \
-    openg2p-g2p-bridge-example-bank-models==1.1.0 \
-    openg2p-g2p-bridge-example-bank-celery==1.1.0
+    git+https://github.com/openg2p/openg2p-fastapi-common@1.1\#subdirectory=openg2p-fastapi-common \
+    git+https://github.com/openg2p/openg2p-g2p-bridge-example-bank@1.1\#subdirectory=openg2p-example-bank-models \
+    ./src
 
 USER ${container_user}
 
 CMD python3 main.py migrate; \
-    celery -A main.celery_app worker --loglevel=info --beat & \
-    celery -A main.celery_app worker --loglevel=info -Q g2p_bridge_celery_worker_tasks
+    gunicorn "main:app" --workers ${EXAMPLE_BANK_NO_OF_WORKERS} --worker-class uvicorn.workers.UvicornWorker --bind ${EXAMPLE_BANK_HOST}:${EXAMPLE_BANK_PORT}

@@ -3,11 +3,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "openg2p-g2p-bridge-example-bank-api"
+name = "openg2p-example-bank-models"
 authors = [
   { name="OpenG2P", email="info@openg2p.org" },
 ]
-description = "OpenG2P G2P Bridge API"
+description = "OpenG2P G2P Bridge Example Bank Models"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -18,15 +18,14 @@ classifiers = [
 dependencies = [
     "openg2p-fastapi-common",
     "openg2p-fastapi-auth",
-    "celery",
 ]
 dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://openg2p.org"
 Documentation = "https://docs.openg2p.org/"
-Repository = "https://github.com/OpenG2P/openg2p-g2p-bridge-example-bank-api"
-Source = "https://github.com/OpenG2P/openg2p-g2p-bridge-example-bank-api"
+Repository = "https://github.com/OpenG2P/openg2p-g2p-bridge-example-bank"
+Source = "https://github.com/OpenG2P/openg2p-g2p-bridge-example-bank"
 
 [tool.hatch.version]
-path = "src/openg2p_g2p_bridge_example_bank_api/__init__.py"
+path = "src/openg2p_example_bank_models/__init__.py"

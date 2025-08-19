@@ -1,13 +1,13 @@
 import json
 import logging
 
-from openg2p_g2p_bridge_example_bank_models.models import (
+from openg2p_example_bank_models.models import (
     FundBlock,
     InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
     PaymentStatus,
 )
-from openg2p_g2p_bridge_example_bank_models.schemas import InitiatePaymentPayload
+from openg2p_example_bank_models.schemas import InitiatePaymentPayload
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
