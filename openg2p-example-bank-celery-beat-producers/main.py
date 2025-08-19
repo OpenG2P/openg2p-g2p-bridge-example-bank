@@ -9,3 +9,4 @@ celery_app = celery_app
 
 if __name__ == "__main__":
     initializer.main()
+
