@@ -27,5 +27,4 @@ RUN python3 -m pip install  \
 
 USER ${container_user}
 
-CMD python3 main.py migrate; \
-    celery -A main.celery_app worker --loglevel=info -Q example_bank_queue
+CMD celery -A main.celery_app worker --loglevel=info -Q example_bank_queue
