@@ -17,7 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "openg2p-fastapi-common",
-    "celery",
+    "celery[redis]",
     "requests",
     "fastnanoid",
     "asyncpg",
