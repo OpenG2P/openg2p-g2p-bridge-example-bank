@@ -13,7 +13,8 @@ _logger = logging.getLogger(_config.logging_default_logger_name)
 
 class Initializer(BaseInitializer):
     def initialize(self, **kwargs):
-        super().initialize()
+        super().init_logger()
+        super().init_app()
 
 
 def get_engine():
