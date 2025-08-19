@@ -9,8 +9,6 @@ from openg2p_example_bank_models.models import (
     Account,
     AccountStatement,
     AccountingLog,
-    AccountStatementStatus,
-    DebitCreditTypes,
     FundBlock,
     InitiatePaymentRequest,
     InitiatePaymentBatchRequest,
@@ -51,8 +49,6 @@ class Initializer(BaseInitializer):
             await InitiatePaymentBatchRequest.create_migrate()
             await AccountStatement.create_migrate()
             await AccountingLog.create_migrate()
-            await AccountStatementStatus.create_migrate()
-            await DebitCreditTypes.create_migrate()
             _logger.info("Database migration completed")
 
         asyncio.run(migrate())
