@@ -2,7 +2,7 @@
 
 # ruff: noqa: I001
 
-from openg2p_g2p_bridge_example_bank_api.app import Initializer
+from openg2p_example_bank_api.app import Initializer
 from openg2p_fastapi_common.ping import PingInitializer
 
 initializer = Initializer()

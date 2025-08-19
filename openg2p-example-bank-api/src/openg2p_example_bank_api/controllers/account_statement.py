@@ -1,12 +1,12 @@
 import logging
 
-from openg2p_fastapi_common.context import dbengine
-from openg2p_fastapi_common.controller import BaseController
-from openg2p_g2p_bridge_example_bank_models.models import Account, AccountStatement
-from openg2p_g2p_bridge_example_bank_models.schemas import (
+from openg2p_example_bank_models.models import Account, AccountStatement
+from openg2p_example_bank_models.schemas import (
     AccountStatementRequest,
     AccountStatementResponse,
 )
+from openg2p_fastapi_common.context import dbengine
+from openg2p_fastapi_common.controller import BaseController
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
 

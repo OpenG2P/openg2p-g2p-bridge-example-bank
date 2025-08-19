@@ -2,18 +2,18 @@
 import asyncio
 import logging
 
-from openg2p_g2p_bridge_example_bank_api.config import Settings
+from openg2p_example_bank_api.config import Settings
 
 _config = Settings.get_config()
-from openg2p_fastapi_common.app import Initializer as BaseInitializer
-from openg2p_g2p_bridge_example_bank_models.models import (
+from openg2p_example_bank_models.models import (
     Account,
     FundBlock,
     InitiatePaymentRequest,
 )
+from openg2p_fastapi_common.app import Initializer as BaseInitializer
 from sqlalchemy import create_engine
 
-from openg2p_g2p_bridge_example_bank_api.controllers import (
+from openg2p_example_bank_api.controllers import (
     AccountStatementController,
     BlockFundsController,
     FundAvailabilityController,
