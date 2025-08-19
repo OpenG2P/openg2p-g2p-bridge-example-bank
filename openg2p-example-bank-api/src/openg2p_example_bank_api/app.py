@@ -7,8 +7,14 @@ from openg2p_example_bank_api.config import Settings
 _config = Settings.get_config()
 from openg2p_example_bank_models.models import (
     Account,
+    AccountStatement,
+    AccountingLog,
+    AccountStatementStatus,
+    DebitCreditTypes,
     FundBlock,
     InitiatePaymentRequest,
+    InitiatePaymentBatchRequest,
+
 )
 from openg2p_fastapi_common.app import Initializer as BaseInitializer
 from sqlalchemy import create_engine
@@ -42,6 +48,12 @@ class Initializer(BaseInitializer):
             await Account.create_migrate()
             await FundBlock.create_migrate()
             await InitiatePaymentRequest.create_migrate()
+            await InitiatePaymentBatchRequest.create_migrate()
+            await AccountStatement.create_migrate()
+            await AccountingLog.create_migrate()
+            await AccountStatementStatus.create_migrate()
+            await DebitCreditTypes.create_migrate()
+            _logger.info("Database migration completed")
 
         asyncio.run(migrate())
 
