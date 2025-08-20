@@ -15,7 +15,7 @@ from sqlalchemy.orm import sessionmaker
 
 from ..app import celery_app, get_engine
 from ..config import Settings
-from ..utils import Mt940Writer, TransactionType, create_jwt_token
+from ..utils import Mt940Writer, TransactionType
 
 _config = Settings.get_config()
 _engine = get_engine()
@@ -148,11 +148,9 @@ def account_statement_generator_worker(account_statement_id: int):
                 "content_type": "text/plain",
             }
         }
-        jwt_token = create_jwt_token(files_json, _config.private_key)
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Signature": jwt_token,
         }
         try:
             response = requests.post(
