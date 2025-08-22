@@ -1,4 +1,3 @@
-import io
 import logging
 from decimal import Decimal
 
@@ -21,6 +20,7 @@ _config = Settings.get_config()
 _engine = get_engine()
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
+
 
 @celery_app.task(name="account_statement_generator_worker")
 def account_statement_generator_worker(account_statement_id: int):
