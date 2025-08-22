@@ -97,7 +97,8 @@ def process_payments_worker(payment_request_batch_id: str):
                 failure_random_number = random.randint(1, 100)
                 if (
                     failure_random_number <= 30
-                    and initiate_payment_request.beneficiary_bank_code != "EXAMPLE_BANK"
+                    and initiate_payment_request.beneficiary_bank_code
+                    != _config.bank_simulator_code
                 ):
                     failure_logs.append(accounting_log_debit)
                     failure_logs.append(accounting_log_credit)
@@ -197,7 +198,10 @@ def construct_credit_account_details(initiate_payment_request: InitiatePaymentRe
             None,
         )
     elif initiate_payment_request.beneficiary_account_type == "BANK_ACCOUNT":
-        if initiate_payment_request.beneficiary_bank_code == "EXAMPLE_BANK":
+        if (
+            initiate_payment_request.beneficiary_bank_code
+            == _config.bank_simulator_code
+        ):
             return (
                 initiate_payment_request.beneficiary_account,
                 initiate_payment_request.beneficiary_name,

@@ -1,4 +1,3 @@
-import io
 import logging
 from decimal import Decimal
 
@@ -15,11 +14,10 @@ from sqlalchemy.orm import sessionmaker
 
 from ..app import celery_app, get_engine
 from ..config import Settings
-from ..utils import Mt940Writer, TransactionType, create_jwt_token
+from ..utils import Mt940Writer, TransactionType
 
 _config = Settings.get_config()
 _engine = get_engine()
-
 
 _logger = logging.getLogger(_config.logging_default_logger_name)
 
@@ -136,31 +134,33 @@ def account_statement_generator_worker(account_statement_id: int):
         _logger.info("Account statement generated successfully")
         session.commit()
 
-        # Prepare the in-memory file
-        mt940_file = io.StringIO(str(mt940_statement))
+        # Prepare the in-memory file content
+        mt940_content = str(mt940_statement)
 
-        # Prepare the files dictionary for the request
-        {"statement_file": ("statement.mt940", mt940_file.getvalue(), "text/plain")}
-        files_json = {
-            "statement_file": {
-                "filename": "statement.mt940",
-                "content": mt940_file.getvalue(),
-                "content_type": "text/plain",
-            }
+        # Send multipart/form-data with the file field required by FastAPI
+        files = {
+            "statement_file": ("statement.mt940", mt940_content, "text/plain"),
         }
-        jwt_token = create_jwt_token(files_json, _config.private_key)
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Signature": jwt_token,
-        }
+
+        # If your API also expects additional form fields, include them here:
+        # data = {"account_statement_id": str(account_statement_id)}
+        data = None
+
         try:
             response = requests.post(
                 _config.mt940_statement_callback_url,
-                json=files_json,
-                headers=headers,
+                files=files,
+                data=data,
+                timeout=30,
             )
             response.raise_for_status()
             _logger.info("MT940 statement uploaded successfully")
         except requests.exceptions.RequestException as e:
-            _logger.error(f"Failed to upload MT940 statement: {e}")
+            # Include response text if available for easier troubleshooting
+            err_text = ""
+            if hasattr(e, "response") and e.response is not None:
+                try:
+                    err_text = f" | response_text={e.response.text}"
+                except Exception:
+                    pass
+            _logger.error(f"Failed to upload MT940 statement: {e}{err_text}")

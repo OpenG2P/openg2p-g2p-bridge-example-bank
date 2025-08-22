@@ -7,7 +7,10 @@ from openg2p_example_bank_api.config import Settings
 _config = Settings.get_config()
 from openg2p_example_bank_models.models import (
     Account,
+    AccountingLog,
+    AccountStatement,
     FundBlock,
+    InitiatePaymentBatchRequest,
     InitiatePaymentRequest,
 )
 from openg2p_fastapi_common.app import Initializer as BaseInitializer
@@ -42,6 +45,10 @@ class Initializer(BaseInitializer):
             await Account.create_migrate()
             await FundBlock.create_migrate()
             await InitiatePaymentRequest.create_migrate()
+            await InitiatePaymentBatchRequest.create_migrate()
+            await AccountStatement.create_migrate()
+            await AccountingLog.create_migrate()
+            _logger.info("Database migration completed")
 
         asyncio.run(migrate())
 

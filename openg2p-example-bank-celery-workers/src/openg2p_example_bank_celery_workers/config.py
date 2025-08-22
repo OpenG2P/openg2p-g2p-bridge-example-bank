@@ -27,3 +27,5 @@ class Settings(BaseSettings):
     payment_initiate_attempts: int = 3
 
     mt940_statement_callback_url: str = "http://localhost:8000/upload_mt940_statement"
+
+    bank_simulator_code: str = "EXAMPLE-BANK"
